@@ -1,0 +1,335 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Linux利用iptables做端口复用 | 0pen1的博客</title>
+  <meta name="author" content="0pen1">
+  
+  <meta name="description" content="Linux利用iptables做端口复用方案一：(根据源地址做端口复用)以下这条命令的作用是将来自192.168.10.13的访问80端口的流量都重定向到22端口。
+1iptables -t nat -A PREROUTING -p tcp -s 192.168.10.13 --dport 80 -j REDIRECT --to-port 22
+
+但是这样做有一个问题就是，我们访问目标主机80端口的流量都会被转给22端口。如果我们不用访问该HTTP服务的话，这是一个好的办法。实战中，我们一般是用VPS连接不用访问HTTP服务，所以在实战中该方法用的比较多。
+方案二：(根据源地址源端口做端口复用)以下的命令是根据源地址源端口做端口复用，也就是只有来自192.168.10.13主机的33333端口的访问80端口的流量会被转给22端口.
+1iptables -t nat -A PREROUTING -p tcp -s 192.168.10.13 --sport 33333 --dport 80 -j REDIRECT --to-port 22
+
+然后我们本机先用socat将本地44444端口的流量以源端口33333访问192.168.10.129的80，然后我们SSH本地的44444端口即可。
+12nohup socat tcp-listen:44444,fork,reuseaddr tcp:192.168.10.129:80,sourceport=33333,reuseaddr &amp;amp;ssh -p 44444 root@127.0.0.1"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Linux利用iptables做端口复用"/>
+  <meta property="og:site_name" content="0pen1的博客"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70812759-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70812759-1');
+</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">0pen1的博客</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class=""></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class=""></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class=""></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Linux利用iptables做端口复用</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h2 id="Linux利用iptables做端口复用"><a href="#Linux利用iptables做端口复用" class="headerlink" title="Linux利用iptables做端口复用"></a>Linux利用iptables做端口复用</h2><h3 id="方案一：-根据源地址做端口复用"><a href="#方案一：-根据源地址做端口复用" class="headerlink" title="方案一：(根据源地址做端口复用)"></a>方案一：(根据源地址做端口复用)</h3><p>以下这条命令的作用是将来自192.168.10.13的访问80端口的流量都重定向到22端口。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -p tcp -s 192.168.10.13 --dport 80 -j REDIRECT --to-port 22</span><br></pre></td></tr></table></figure>
+
+<p>但是这样做有一个问题就是，我们访问目标主机80端口的流量都会被转给22端口。如果我们不用访问该HTTP服务的话，这是一个好的办法。实战中，我们一般是用VPS连接不用访问HTTP服务，所以在实战中该方法用的比较多。</p>
+<h3 id="方案二：-根据源地址源端口做端口复用"><a href="#方案二：-根据源地址源端口做端口复用" class="headerlink" title="方案二：(根据源地址源端口做端口复用)"></a>方案二：(根据源地址源端口做端口复用)</h3><p>以下的命令是根据源地址源端口做端口复用，也就是只有来自192.168.10.13主机的33333端口的访问80端口的流量会被转给22端口.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -p tcp -s 192.168.10.13 --sport 33333 --dport 80 -j REDIRECT --to-port 22</span><br></pre></td></tr></table></figure>
+
+<p>然后我们本机先用socat将本地44444端口的流量以源端口33333访问192.168.10.129的80，然后我们SSH本地的44444端口即可。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nohup socat tcp-listen:44444,fork,reuseaddr tcp:192.168.10.129:80,sourceport=33333,reuseaddr &amp;</span><br><span class="line">ssh -p 44444 root@127.0.0.1</span><br></pre></td></tr></table></figure>
+
+<p>但是这样做有一个问题就是不支持多连接 如果想创建两个 SSH 连接就会出错，因为本地的33333 端口已经被第一个 SSH 连接占用了。</p>
+<h3 id="方案三：-利用ICMP协议做遥控开关"><a href="#方案三：-利用ICMP协议做遥控开关" class="headerlink" title="方案三：(利用ICMP协议做遥控开关)"></a>方案三：(利用ICMP协议做遥控开关)</h3><p>利用 ICMP 做遥控开关。缺点在于如果目标在内网，你是无法直接 ping 到它的。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -N LETMEIN       <span class="comment">#创建端口复用链</span></span><br><span class="line"></span><br><span class="line">iptables -t nat -A LETMEIN -p tcp -j REDIRECT --to-port 22  <span class="comment">#创建端口复用规则，将流量转发至 22 端口</span></span><br><span class="line"></span><br><span class="line">iptables -t nat -A PREROUTING -p icmp --icmp-type 8 -m length --length1139 -m recent --<span class="built_in">set</span> --name letmein --rsource -j ACCEPT  <span class="comment">#开启开关，如果接收到一个长为 1139 的 ICMP 包，则将来源 IP 添加到加为letmein的列表中</span></span><br><span class="line"></span><br><span class="line">iptables -t nat -A PREROUTING -p icmp --icmp-type 8 -m length --length1140 -m recent --name letmein --remove -j ACCEPT      <span class="comment">#关闭开关，如果接收到一个长为 1140 的 ICMP 包，则将来源 IP 从 letmein 列表中去掉</span></span><br><span class="line"></span><br><span class="line">iptables -t nat -A PREROUTING -p tcp --dport 80 --syn -m recent --rcheck --seconds 3600 --name letmein --rsource -j LETMEIN   <span class="comment">#如果发现 SYN 包的来源 IP 处于 letmein 列表中，将跳转到 LETMEIN 链进行处理，有效时间为 3600 秒</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">开启复用</span><br><span class="line">ping -c 1 -s 1111 192.168.10.129        <span class="comment">#向目标发送一个长度为 1111 的 ICMP 数据包（加上包头28，总长度实际为1139）</span></span><br><span class="line"></span><br><span class="line">关闭复用</span><br><span class="line">ping -c 1 -s 1112 192.168.10.129        <span class="comment">#向目标发送一个长度为 1112 的 ICMP 数据包（加上包头 28，总长度实际为 1140）</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="方案四：-利用TCP协议做遥控开关"><a href="#方案四：-利用TCP协议做遥控开关" class="headerlink" title="方案四：(利用TCP协议做遥控开关)"></a>方案四：(利用TCP协议做遥控开关)</h3><p>利用 tcp 数据包中的关键字做遥控开关，不怕目标在内网。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -N LETMEIN    <span class="comment">#创建端口复用链</span></span><br><span class="line"></span><br><span class="line">iptables -t nat -A LETMEIN -p tcp -j REDIRECT --to-port 22 <span class="comment">#创建端口复用规则，将流量转发至 22 端口</span></span><br><span class="line"></span><br><span class="line">iptables -A INPUT -p tcp -m string --string <span class="string">&#x27;threathuntercoming&#x27;</span> --algo bm -m recent --<span class="built_in">set</span> --name letmein --rsource -j ACCEPT  <span class="comment">#开启开关，如果接收到一个含有threathuntercoming的TCP包，则将来源 IP 添加到加为letmein的列表中</span></span><br><span class="line"></span><br><span class="line">iptables -A INPUT -p tcp -m string --string <span class="string">&#x27;threathunterleaving&#x27;</span> --algo bm -m recent --name letmein --remove -j ACCEPT    <span class="comment">#关闭开关，如果接收到一个含有threathunterleaving的TCP包，则将来源 IP 从letmein的列表中移除</span></span><br><span class="line"></span><br><span class="line">iptables -t nat -A PREROUTING -p tcp --dport 80 --syn -m recent --rcheck --seconds 3600 --name letmein --rsource -j LETMEIN   <span class="comment">#如果发现 SYN 包的来源 IP 处于 letmein 列表中，将跳转到 LETMEIN 链进行处理，有效时间为 3600 秒</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">开启复用，开启后本机到目标 80 端口的流量将转发至目标的 SSH</span><br><span class="line"><span class="built_in">echo</span> threathuntercoming | socat - tcp:192.168.10.129:80</span><br><span class="line"></span><br><span class="line">关闭复用，关闭后，80 恢复正常：</span><br><span class="line"><span class="built_in">echo</span> threathunterleaving | socat - tcp:192.168.10.129:80</span><br></pre></td></tr></table></figure>
+
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/2021/04/20/Linux%E5%88%A9%E7%94%A8iptables%E5%81%9A%E7%AB%AF%E5%8F%A3%E5%A4%8D%E7%94%A8/" class="leancloud-visitors view" data-flag-title="Linux利用iptables做端口复用">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a type="button" class="btn btn-default disabled"><i class="fa fa-arrow-circle-o-left"></i>Prev</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2021/04/19/docker逃逸/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xxx","appKey":"xxx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2021-04-20 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/Linux/">Linux<span>1</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/iptables/">iptables<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 0pen1's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>
