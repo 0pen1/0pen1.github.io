@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>Ubuntu执行service iptables -save报错iptables：unrecognized service 的解决方法</title>
+      <link href="2021/05/11/Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/"/>
+      <url>2021/05/11/Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/</url>
+      
+        <content type="html"><![CDATA[<p>问题描述：</p><p><img src="Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95.assets/image-20210511171538464-1620724541793.png" alt="image-20210511171538464"></p><p>解决办法：</p><p>因为Ubuntu默认使用的防火墙并不是iptables，所以使用iptables之前需要先禁用UFW。</p><p>命令如下：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw disable</span><br></pre></td></tr></table></figure><p>类似地，在CentOS 7服务器的情况下，防火墙也可能是冲突的一个原因。FirewallD默认包含在CentOS 7中。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service iptables save</span><br></pre></td></tr></table></figure><p>有时，在Ubuntu服务器中执行以下命令会返回一个无法识别的服务消息。</p><p>该命令基于/etc/init.d文件夹中iptables的启动脚本起作用。 通常，此命令适用于RHEL / Red Hat / CentOS。 在Ubuntu中，要保存防火墙规则的更改，我们使用以下命令</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo &#x2F;sbin&#x2F;iptables-save</span><br></pre></td></tr></table></figure><p>但是，如果坚持使用与以前相同的命令，我们可以在/etc/init.d文件夹中添加自定义的可执行启动脚本。 这样可以有效地解决错误。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> iptables </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> iptables </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>横向移动</title>
       <link href="2021/04/20/%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/"/>
       <url>2021/04/20/%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/</url>
