@@ -6,26 +6,26 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="expires" content="0">
   
-  <title>Ubuntu执行service iptables -save报错iptables：unrecognized service 的解决方法 | 0pen1的博客</title>
+  <title>Jar包反编译和重打包 | 0pen1的博客</title>
   <meta name="author" content="0pen1">
   
-  <meta name="description" content="问题描述：
+  <meta name="description" content="Jar反编译和重打包使用jadx反编译
+1.&amp;#x2F;jadx -d win win.jar
 
-解决办法：
-因为Ubuntu默认使用的防火墙并不是iptables，所以使用iptables之前需要先禁用UFW。
-命令如下：
-1sudo ufw disable
 
-类似地，在CentOS 7服务器的情况下，防火墙也可能是冲突的一个原因。FirewallD默认包含在CentOS 7中。
-1service iptables save
 
-有时，在Ubuntu服务器中执行以下命令会返回一个无法识别的服务消息。
-该命令基于/etc/init.d文件夹中iptables的启动脚本起作用。 通常，此命令适用于RHEL / Red Hat / CentOS。 在Ubuntu中，要保存防火墙规则的更改，我们使用以下命令"> 
+使用javac编译工程
+1javac -encoding utf8 -cp classes -d classes .&amp;#x2F;src&amp;#x2F;com&amp;#x2F;jlcss&amp;#x2F;ep&amp;#x2F;*.java -classpath .&amp;#x2F;lib&amp;#x2F;swt.jar
+
+
+
+重新打包
+将jar解压，替换classes后重新打包成zip文件，最后将后缀改成jar即可"> 
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="Ubuntu执行service iptables -save报错iptables：unrecognized service 的解决方法"/>
+  <meta property="og:title" content="Jar包反编译和重打包"/>
   <meta property="og:site_name" content="0pen1的博客"/>
 
   
@@ -116,7 +116,7 @@
 
 	
 		<div class="page-header">
-			<h1> Ubuntu执行service iptables -save报错iptables：unrecognized service 的解决方法</h1>
+			<h1> Jar包反编译和重打包</h1>
 		</div>
 	
 
@@ -133,21 +133,18 @@
 	<div class="mypage">		
 	  		
 
-	  <p>问题描述：</p>
-<p><img src="Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95.assets/image-20210511171538464-1620724541793.png" alt="image-20210511171538464"></p>
-<p>解决办法：</p>
-<p>因为Ubuntu默认使用的防火墙并不是iptables，所以使用iptables之前需要先禁用UFW。</p>
-<p>命令如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw disable</span><br></pre></td></tr></table></figure>
+	  <h1 id="Jar反编译和重打包"><a href="#Jar反编译和重打包" class="headerlink" title="Jar反编译和重打包"></a>Jar反编译和重打包</h1><p><strong>使用jadx反编译</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;jadx -d win win.jar</span><br></pre></td></tr></table></figure>
 
-<p>类似地，在CentOS 7服务器的情况下，防火墙也可能是冲突的一个原因。FirewallD默认包含在CentOS 7中。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service iptables save</span><br></pre></td></tr></table></figure>
 
-<p>有时，在Ubuntu服务器中执行以下命令会返回一个无法识别的服务消息。</p>
-<p>该命令基于/etc/init.d文件夹中iptables的启动脚本起作用。 通常，此命令适用于RHEL / Red Hat / CentOS。 在Ubuntu中，要保存防火墙规则的更改，我们使用以下命令</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo &#x2F;sbin&#x2F;iptables-save</span><br></pre></td></tr></table></figure>
 
-<p>但是，如果坚持使用与以前相同的命令，我们可以在/etc/init.d文件夹中添加自定义的可执行启动脚本。 这样可以有效地解决错误。</p>
+<p><strong>使用javac编译工程</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javac -encoding utf8 -cp classes -d classes .&#x2F;src&#x2F;com&#x2F;jlcss&#x2F;ep&#x2F;*.java -classpath .&#x2F;lib&#x2F;swt.jar</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>重新打包</strong></p>
+<p>将jar解压，替换classes后重新打包成zip文件，最后将后缀改成jar即可</p>
 
 	  <div class="article-footer-copyright">
 
@@ -157,7 +154,7 @@
 	</div>
 
 	
-	<span id="/2021/05/11/Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/" class="leancloud-visitors view" data-flag-title="Ubuntu执行service iptables -save报错iptables：unrecognized service 的解决方法">
+	<span id="/2021/06/21/Jar%E5%8C%85%E5%8F%8D%E7%BC%96%E8%AF%91%E5%92%8C%E9%87%8D%E6%89%93%E5%8C%85/" class="leancloud-visitors view" data-flag-title="Jar包反编译和重打包">
 		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
 	</span>
 	
@@ -168,13 +165,12 @@
 
     
     
-    <a href="/2021/06/21/Jar包反编译和重打包/" type="button" class="btn btn-default"><i
-                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    <a type="button" class="btn btn-default disabled"><i class="fa fa-arrow-circle-o-left"></i>Prev</a>
     
 
     <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
     
-    <a href="/2021/04/20/横向移动/" type="button" class="btn btn-default ">Next<i
+    <a href="/2021/05/11/Ubuntu执行service-iptables-save报错iptables：unrecognized-service-的解决方法/" type="button" class="btn btn-default ">Next<i
                 class="fa fa-arrow-circle-o-right"></i></a>
     
 
@@ -231,23 +227,12 @@ new Valine(valineConfig);
 	
 	<div class="meta-widget">
 	<i class="fa fa-clock-o"></i>
-	2021-05-11 
+	2021-06-21 
 	</div>
 	
 
 	<!-- categories -->
     
-	<div class="meta-widget">
-	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
-    <ul id="categorys" class="tag_box list-unstyled collapse in">
-          
-  <li>
-    <li><a href="/categories/iptables/">iptables<span>1</span></a></li>
-  </li>
-
-    </ul>
-	</div>
-	
 
 	<!-- tags -->
 	
@@ -255,7 +240,7 @@ new Valine(valineConfig);
 	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
     <ul id="tags" class="tag_box list-unstyled collapse in">	  
 	    
-  <li><a href="/tags/iptables/">iptables<span>2</span></a></li>
+  <li><a href="/tags/反编译/">反编译<span>1</span></a></li>
     </ul>
 	</div>
 		

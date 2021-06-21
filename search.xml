@@ -4,6 +4,25 @@
   
     
     <entry>
+      <title>Jar包反编译和重打包</title>
+      <link href="2021/06/21/Jar%E5%8C%85%E5%8F%8D%E7%BC%96%E8%AF%91%E5%92%8C%E9%87%8D%E6%89%93%E5%8C%85/"/>
+      <url>2021/06/21/Jar%E5%8C%85%E5%8F%8D%E7%BC%96%E8%AF%91%E5%92%8C%E9%87%8D%E6%89%93%E5%8C%85/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Jar反编译和重打包"><a href="#Jar反编译和重打包" class="headerlink" title="Jar反编译和重打包"></a>Jar反编译和重打包</h1><p><strong>使用jadx反编译</strong></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;jadx -d win win.jar</span><br></pre></td></tr></table></figure><p><strong>使用javac编译工程</strong></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javac -encoding utf8 -cp classes -d classes .&#x2F;src&#x2F;com&#x2F;jlcss&#x2F;ep&#x2F;*.java -classpath .&#x2F;lib&#x2F;swt.jar</span><br></pre></td></tr></table></figure><p><strong>重新打包</strong></p><p>将jar解压，替换classes后重新打包成zip文件，最后将后缀改成jar即可</p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 反编译 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Ubuntu执行service iptables -save报错iptables：unrecognized service 的解决方法</title>
       <link href="2021/05/11/Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/"/>
       <url>2021/05/11/Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/</url>
