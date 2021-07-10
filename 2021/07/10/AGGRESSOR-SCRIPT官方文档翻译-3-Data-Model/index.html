@@ -1,0 +1,392 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>AGGRESSOR SCRIPT官方文档翻译-3. Data Model | 0pen1的博客</title>
+  <meta name="author" content="0pen1">
+  
+  <meta name="description" content="AGGRESSOR SCRIPT官方文档翻译-3. Data ModelCobalt Strike的团队服务器存储您的主机、服务、凭证和其他信息。 它还广播该信息，并使其对所有客户端可用。
+数据 API使用 &amp;amp;data_query功能查询Cobalt Strike的数据模型。该功能可以访问Cobalt Strike客户端维护的所有状态和信息。使用&amp;amp;data_keys 来获得你可能查询的不同数据片段的列表。此示例查询Cobalt Strike数据模型中的所有数据，并将其导出到一个文本文件:
+12345678910111213141516command export &amp;#123;# 注册命令	local(&amp;#39;$handle $model $row $entry $index&amp;#39;);	# 声明局部变量	$handle &amp;#x3D; openf(&amp;quot;&amp;gt;export.txt&amp;quot;);	# 打开一个文件句柄	foreach $model (data_keys()) &amp;#123;	# 遍历数据模型		println($handle, &amp;quot;&amp;#x3D;&amp;#x3D; $model &amp;#x3D;&amp;#x3D;&amp;quot;);		println($handle, data_query($model));	&amp;#125;		closef($handle);	# 关闭文件句柄	println(&amp;quot;See export.txt for the data.&amp;quot;);&amp;#125;
+
+控制台执行：
+
+导出的数据：
+
+Cobalt Strike提供了几个函数，可以更直观地使用数据模型。"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="AGGRESSOR SCRIPT官方文档翻译-3. Data Model"/>
+  <meta property="og:site_name" content="0pen1的博客"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70812759-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70812759-1');
+</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">0pen1的博客</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class=""></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class=""></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class=""></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> AGGRESSOR SCRIPT官方文档翻译-3. Data Model</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h1 id="AGGRESSOR-SCRIPT官方文档翻译-3-Data-Model"><a href="#AGGRESSOR-SCRIPT官方文档翻译-3-Data-Model" class="headerlink" title="AGGRESSOR SCRIPT官方文档翻译-3. Data Model"></a>AGGRESSOR SCRIPT官方文档翻译-3. Data Model</h1><p>Cobalt Strike的团队服务器存储您的主机、服务、凭证和其他信息。 它还广播该信息，并使其对所有客户端可用。</p>
+<h2 id="数据-API"><a href="#数据-API" class="headerlink" title="数据 API"></a>数据 API</h2><p>使用 <a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#data_query">&amp;data_query</a>功能查询Cobalt Strike的数据模型。该功能可以访问Cobalt Strike客户端维护的所有状态和信息。使用<a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#data_keys">&amp;data_keys</a> 来获得你可能查询的不同数据片段的列表。此示例查询Cobalt Strike数据模型中的所有数据，并将其导出到一个文本文件:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">command export &#123;</span><br><span class="line"># 注册命令</span><br><span class="line">	local(&#39;$handle $model $row $entry $index&#39;);</span><br><span class="line">	# 声明局部变量</span><br><span class="line">	$handle &#x3D; openf(&quot;&gt;export.txt&quot;);</span><br><span class="line">	# 打开一个文件句柄</span><br><span class="line">	foreach $model (data_keys()) &#123;</span><br><span class="line">	# 遍历数据模型</span><br><span class="line">		println($handle, &quot;&#x3D;&#x3D; $model &#x3D;&#x3D;&quot;);</span><br><span class="line">		println($handle, data_query($model));</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	closef($handle);</span><br><span class="line">	# 关闭文件句柄</span><br><span class="line">	println(&quot;See export.txt for the data.&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>控制台执行：</p>
+<p><img src="AGGRESSOR-SCRIPT%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91-3-Data-Model.assets/image-20210710090308507.png" alt="image-20210710090308507"></p>
+<p>导出的数据：</p>
+<p><img src="AGGRESSOR-SCRIPT%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91-3-Data-Model.assets/image-20210710090246700.png" alt="image-20210710090246700"></p>
+<p>Cobalt Strike提供了几个函数，可以更直观地使用数据模型。</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>applications</td>
+<td><a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#applications">&amp;applications</a></td>
+<td>系统配置信息 [<strong>View -&gt; Applications</strong>]</td>
+</tr>
+<tr>
+<td>archives</td>
+<td><a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#archives">&amp;archives</a></td>
+<td>连接事件/活动</td>
+</tr>
+<tr>
+<td>beacons</td>
+<td><a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#beacons">&amp;beacons</a></td>
+<td>活动的 beacons</td>
+</tr>
+<tr>
+<td>credentials</td>
+<td><a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#credentials">&amp;credentials</a></td>
+<td>用户名、口令等.</td>
+</tr>
+<tr>
+<td>downloads</td>
+<td><a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#downloads">&amp;downloads</a></td>
+<td>下载的文件</td>
+</tr>
+<tr>
+<td>keystrokes</td>
+<td><a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#keystrokes">&amp;keystrokes</a></td>
+<td>键盘记录</td>
+</tr>
+<tr>
+<td>screenshots</td>
+<td><a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#screenshots">&amp;screenshots</a></td>
+<td>截屏</td>
+</tr>
+<tr>
+<td>services</td>
+<td><a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#services">&amp;services</a></td>
+<td>服务和服务信息</td>
+</tr>
+<tr>
+<td>sites</td>
+<td><a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#sites">&amp;sites</a></td>
+<td>资产信息</td>
+</tr>
+<tr>
+<td>socks</td>
+<td><a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#pivots">&amp;pivots</a></td>
+<td>SOCKS代理服务器和端口转发</td>
+</tr>
+<tr>
+<td>targets</td>
+<td><a target="_blank" rel="noopener" href="https://www.cobaltstrike.com/aggressor-script/functions.html#targets">&amp;targets</a></td>
+<td>主机和主机信息</td>
+</tr>
+</tbody></table>
+<p>这些函数在数据模型中为每个条目返回一个一行的数组。 每个条目是一个具有描述条目的不同键/值对的字典。</p>
+<p>理解数据模型的最佳方法是通过Aggressor Script 控制台来研究它。进入View -&gt; Script Console并使用x命令计算表达式。例如：</p>
+<p><img src="AGGRESSOR-SCRIPT%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91-3-Data-Model.assets/data.png" alt="Querying Data from the Aggressor Script console"></p>
+<p>从Aggressor Script 控制台查询数据</p>
+<p>使用 on DATA_KEY 订阅对特定数据模型的更改。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">on keystrokes &#123;</span><br><span class="line">	println(&quot;I have new keystrokes: $1&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/2021/07/10/AGGRESSOR-SCRIPT%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91-3-Data-Model/" class="leancloud-visitors view" data-flag-title="AGGRESSOR SCRIPT官方文档翻译-3. Data Model">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a type="button" class="btn btn-default disabled"><i class="fa fa-arrow-circle-o-left"></i>Prev</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2021/07/09/Aggressor-Script官方文档翻译-2-Cobalt-Strike/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xxx","appKey":"xxx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2021-07-10 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/Cobalt-Strike/">Cobalt Strike<span>2</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/Cobalt-Strike插件开发/">Cobalt Strike插件开发<span>2</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 0pen1's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>
