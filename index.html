@@ -128,6 +128,72 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2021/07/14/Linux手动安装JDK/" >Linux手动安装JDK</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-07-14  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>当Linux无法出网时，需要手动上传jdk压缩包来安装Java环境</p>
+<p>创建安装目录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir &#x2F;usr&#x2F;local&#x2F;java&#x2F;</span><br></pre></td></tr></table></figure>
+
+<p>将压缩包解压至安装目录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf jdk-11.0.11_linux-x64_bin.tar.gz -C &#x2F;usr&#x2F;local&#x2F;java&#x2F;</span><br></pre></td></tr></table></figure>
+
+<p>打开环境变量文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure>
+
+<p>在末尾追加</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME&#x3D;&#x2F;usr&#x2F;local&#x2F;java&#x2F;jdk-11.0.11</span><br><span class="line">export JRE_HOME&#x3D;$&#123;JAVA_HOME&#125;&#x2F;jre</span><br><span class="line">export CLASSPATH&#x3D;.:$&#123;JAVA_HOME&#125;&#x2F;lib:$&#123;JRE_HOME&#125;&#x2F;lib</span><br><span class="line">export PATH&#x3D;$&#123;JAVA_HOME&#125;&#x2F;bin:$PATH</span><br></pre></td></tr></table></figure>
+
+<p>使环境变量生效</p>
+	
+
+	</div>
+  <a type="button" href="/2021/07/14/Linux手动安装JDK/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>当Linux无法出网时，需要手动上传jdk压缩包来安装Java环境</p>
+<p>创建安装目录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir &#x2F;usr&#x2F;local&#x2F;java&#x2F;</span><br></pre></td></tr></table></figure>
+
+<p>将压缩包解压至安装目录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf jdk-11.0.11_linux-x64_bin.tar.gz -C &#x2F;usr&#x2F;local&#x2F;java&#x2F;</span><br></pre></td></tr></table></figure>
+
+<p>打开环境变量文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure>
+
+<p>在末尾追加</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME&#x3D;&#x2F;usr&#x2F;local&#x2F;java&#x2F;jdk-11.0.11</span><br><span class="line">export JRE_HOME&#x3D;$&#123;JAVA_HOME&#125;&#x2F;jre</span><br><span class="line">export CLASSPATH&#x3D;.:$&#123;JAVA_HOME&#125;&#x2F;lib:$&#123;JRE_HOME&#125;&#x2F;lib</span><br><span class="line">export PATH&#x3D;$&#123;JAVA_HOME&#125;&#x2F;bin:$PATH</span><br></pre></td></tr></table></figure>
+
+<p>使环境变量生效</p>
+	
+	</div>
+  <a type="button" href="/2021/07/14/Linux手动安装JDK/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2021/07/10/AGGRESSOR-SCRIPT官方文档翻译-3-Data-Model/" >AGGRESSOR SCRIPT官方文档翻译-3. Data Model</a>
 		</h3>
 		</div>
@@ -623,6 +689,8 @@
 		
 			<li><a href="/categories/Cobalt-Strike/">Cobalt Strike<span>2</span></a></li>
 		
+			<li><a href="/categories/Java/">Java<span>1</span></a></li>
+		
 			<li><a href="/categories/Linux/">Linux<span>1</span></a></li>
 		
 			<li><a href="/categories/iptables/">iptables<span>1</span></a></li>
@@ -640,17 +708,19 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/iptables/">iptables<span>2</span></a></li>
-		
-			<li><a href="/tags/docker/">docker<span>1</span></a></li>
-		
 			<li><a href="/tags/域/">域<span>1</span></a></li>
-		
-			<li><a href="/tags/横向移动/">横向移动<span>1</span></a></li>
 		
 			<li><a href="/tags/反编译/">反编译<span>1</span></a></li>
 		
 			<li><a href="/tags/Cobalt-Strike插件开发/">Cobalt Strike插件开发<span>2</span></a></li>
+		
+			<li><a href="/tags/横向移动/">横向移动<span>1</span></a></li>
+		
+			<li><a href="/tags/iptables/">iptables<span>2</span></a></li>
+		
+			<li><a href="/tags/docker/">docker<span>1</span></a></li>
+		
+			<li><a href="/tags/JDK/">JDK<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -662,6 +732,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2021/07/14/Linux手动安装JDK/" ><i class="fa fa-file-o"></i>Linux手动安装JDK</a>
+      </li>
     
       <li>
         <a href="/2021/07/10/AGGRESSOR-SCRIPT官方文档翻译-3-Data-Model/" ><i class="fa fa-file-o"></i>AGGRESSOR SCRIPT官方文档翻译-3. D...</a>
@@ -677,10 +751,6 @@
     
       <li>
         <a href="/2021/05/11/Ubuntu执行service-iptables-save报错iptables：unrecognized-service-的解决方法/" ><i class="fa fa-file-o"></i>Ubuntu执行service iptables -s...</a>
-      </li>
-    
-      <li>
-        <a href="/2021/04/20/横向移动/" ><i class="fa fa-file-o"></i>横向移动</a>
       </li>
     
   </ul>

@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>Linux手动安装JDK</title>
+      <link href="2021/07/14/Linux%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85JDK/"/>
+      <url>2021/07/14/Linux%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85JDK/</url>
+      
+        <content type="html"><![CDATA[<p>当Linux无法出网时，需要手动上传jdk压缩包来安装Java环境</p><p>创建安装目录</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir &#x2F;usr&#x2F;local&#x2F;java&#x2F;</span><br></pre></td></tr></table></figure><p>将压缩包解压至安装目录</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf jdk-11.0.11_linux-x64_bin.tar.gz -C &#x2F;usr&#x2F;local&#x2F;java&#x2F;</span><br></pre></td></tr></table></figure><p>打开环境变量文件</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure><p>在末尾追加</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME&#x3D;&#x2F;usr&#x2F;local&#x2F;java&#x2F;jdk-11.0.11</span><br><span class="line">export JRE_HOME&#x3D;$&#123;JAVA_HOME&#125;&#x2F;jre</span><br><span class="line">export CLASSPATH&#x3D;.:$&#123;JAVA_HOME&#125;&#x2F;lib:$&#123;JRE_HOME&#125;&#x2F;lib</span><br><span class="line">export PATH&#x3D;$&#123;JAVA_HOME&#125;&#x2F;bin:$PATH</span><br></pre></td></tr></table></figure><p>使环境变量生效</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure><p>添加软链接</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -s &#x2F;usr&#x2F;local&#x2F;java&#x2F;jdk-11.0.11&#x2F;bin&#x2F;java &#x2F;usr&#x2F;bin&#x2F;java</span><br></pre></td></tr></table></figure><p>验证安装</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -version</span><br></pre></td></tr></table></figure><p>完成！</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Java </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> JDK </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>AGGRESSOR SCRIPT官方文档翻译-3. Data Model</title>
       <link href="2021/07/10/AGGRESSOR-SCRIPT%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91-3-Data-Model/"/>
       <url>2021/07/10/AGGRESSOR-SCRIPT%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91-3-Data-Model/</url>
