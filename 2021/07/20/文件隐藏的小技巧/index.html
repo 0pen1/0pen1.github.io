@@ -6,20 +6,30 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="expires" content="0">
   
-  <title>脏牛提权 | 0pen1的博客</title>
+  <title>文件隐藏的小技巧 | 0pen1的博客</title>
   <meta name="author" content="0pen1">
   
-  <meta name="description" content="脏牛提权漏洞原因Dirty COW漏洞是一种发生在写时复制的竞态条件漏洞。
-详细分析参考链接
-https://blog.csdn.net/hbhgyu/article/details/106245182
-漏洞危害低权限用户利用该漏洞技术可以在全版本Linux系统上实现本地提权
-影响范围 Linux kernel 2.x through 4.x before 4.8.3
-验证漏洞是否存在"> 
+  <meta name="description" content="文件隐藏的小技巧为了渗透过程的隐蔽性，我们常常需要将文件进行隐藏处理。下面总结了几条常用的命令，以备不时之需。
+将单个文件变成隐藏的系统文件
+1attrib &amp;quot;文件名&amp;quot; +s +h
+
+将当前目录下的所有文件和文件夹都隐藏：
+1attrib +h +s * &amp;#x2F;s &amp;#x2F;d
+
+
+attrib 命令用来修改文件的属性
++s 参数将文件设置为系统文件
++h 参数将文件设置为隐藏文件
+/S /D 可以对该目录下所有匹配的文件和文件夹执行属性
+
+懂一点技术的用户都知道如何显示隐藏文件，但很少会注意到要显示「隐藏受保护的操作系统文件」，而且进行取消勾选「隐藏受保护的操作系统文件」操作时，系统会弹出一个措辞颇为严厉的警告窗口，足以将大部分普通用户吓阻回去。
+还原的命令如下：
+12attrib &amp;quot;文件名&amp;quot; -s -hattrib -h -s * &amp;#x2F;s &amp;#x2F;d"> 
   
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="脏牛提权"/>
+  <meta property="og:title" content="文件隐藏的小技巧"/>
   <meta property="og:site_name" content="0pen1的博客"/>
 
   
@@ -110,7 +120,7 @@ https://blog.csdn.net/hbhgyu/article/details/106245182
 
 	
 		<div class="page-header">
-			<h1> 脏牛提权</h1>
+			<h1> 文件隐藏的小技巧</h1>
 		</div>
 	
 
@@ -127,20 +137,26 @@ https://blog.csdn.net/hbhgyu/article/details/106245182
 	<div class="mypage">		
 	  		
 
-	  <h1 id="脏牛提权"><a href="#脏牛提权" class="headerlink" title="脏牛提权"></a>脏牛提权</h1><h3 id="漏洞原因"><a href="#漏洞原因" class="headerlink" title="漏洞原因"></a>漏洞原因</h3><p>Dirty COW漏洞是一种发生在<strong>写时复制</strong>的<strong>竞态条件</strong>漏洞。</p>
-<p>详细分析参考链接</p>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/hbhgyu/article/details/106245182">https://blog.csdn.net/hbhgyu/article/details/106245182</a></p>
-<h3 id="漏洞危害"><a href="#漏洞危害" class="headerlink" title="漏洞危害"></a>漏洞危害</h3><p>低权限用户利用该漏洞技术可以在全版本Linux系统上实现本地提权</p>
-<h3 id="影响范围"><a href="#影响范围" class="headerlink" title="影响范围"></a>影响范围</h3><p> Linux kernel 2.x through 4.x before 4.8.3</p>
-<h3 id="验证漏洞是否存在"><a href="#验证漏洞是否存在" class="headerlink" title="验证漏洞是否存在"></a>验证漏洞是否存在</h3><p>使用<code>uname -a</code>命令查看linux内核信息，发现在脏牛漏洞范围内</p>
-<p><img src="%E8%84%8F%E7%89%9B%E6%8F%90%E6%9D%83.assets/image-20210714091603781-1626225366290.png" alt="image-20210714091603781"></p>
-<h3 id="下载EXP"><a href="#下载EXP" class="headerlink" title="下载EXP"></a>下载EXP</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https:&#x2F;&#x2F;github.com&#x2F;Pa55w0rd&#x2F;dirtycow.git</span><br></pre></td></tr></table></figure>
+	  <h1 id="文件隐藏的小技巧"><a href="#文件隐藏的小技巧" class="headerlink" title="文件隐藏的小技巧"></a>文件隐藏的小技巧</h1><p>为了渗透过程的隐蔽性，我们常常需要将文件进行隐藏处理。下面总结了几条常用的命令，以备不时之需。</p>
+<p>将单个文件变成隐藏的系统文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">attrib &quot;文件名&quot; +s +h</span><br></pre></td></tr></table></figure>
 
-<h3 id="将c文件编译成可执行文件"><a href="#将c文件编译成可执行文件" class="headerlink" title="将c文件编译成可执行文件"></a>将c文件编译成可执行文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -pthread dirty.c -o dirty -lcrypt</span><br></pre></td></tr></table></figure>
+<p>将当前目录下的所有文件和文件夹都隐藏：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">attrib +h +s * &#x2F;s &#x2F;d</span><br></pre></td></tr></table></figure>
 
-<h3 id="执行-dirty-密码-命令，即可进行提权。"><a href="#执行-dirty-密码-命令，即可进行提权。" class="headerlink" title="执行./dirty 密码 命令，即可进行提权。"></a>执行./dirty 密码 命令，即可进行提权。</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;dirty 密码</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>attrib</code> 命令用来修改文件的属性</li>
+<li><code>+s</code> 参数将文件设置为系统文件</li>
+<li><code>+h</code> 参数将文件设置为隐藏文件</li>
+<li>/S /D 可以对该目录下所有匹配的文件和文件夹执行属性</li>
+</ul>
+<p>懂一点技术的用户都知道如何显示隐藏文件，但很少会注意到要显示「隐藏受保护的操作系统文件」，而且进行取消勾选「隐藏受保护的操作系统文件」操作时，系统会弹出一个措辞颇为严厉的警告窗口，足以将大部分普通用户吓阻回去。</p>
+<p>还原的命令如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">attrib &quot;文件名&quot; -s -h</span><br><span class="line">attrib -h -s * &#x2F;s &#x2F;d</span><br></pre></td></tr></table></figure>
 
-<p><img src="%E8%84%8F%E7%89%9B%E6%8F%90%E6%9D%83.assets/image-20210714091439210.png" alt="image-20210714091439210"></p>
+
+
+<p>整个方法的原理以及过程其实十分简单，说白了就是利用了「文件浏览器」对于系统文件出于安全考虑，默认不显示在「文件浏览器]中的特性而已。就方法本身而言，安全系数并不高，但因为你可以将想要隐藏的文件任意命名，以及放在任意路径之下，导致外人基本没有可能找到其藏身之处，也就谈不上后续的破解了。</p>
 
 	  <div class="article-footer-copyright">
 
@@ -150,7 +166,7 @@ https://blog.csdn.net/hbhgyu/article/details/106245182
 	</div>
 
 	
-	<span id="/2021/07/14/%E8%84%8F%E7%89%9B%E6%8F%90%E6%9D%83/" class="leancloud-visitors view" data-flag-title="脏牛提权">
+	<span id="/2021/07/20/%E6%96%87%E4%BB%B6%E9%9A%90%E8%97%8F%E7%9A%84%E5%B0%8F%E6%8A%80%E5%B7%A7/" class="leancloud-visitors view" data-flag-title="文件隐藏的小技巧">
 		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
 	</span>
 	
@@ -161,13 +177,12 @@ https://blog.csdn.net/hbhgyu/article/details/106245182
 
     
     
-    <a href="/2021/07/20/文件隐藏的小技巧/" type="button" class="btn btn-default"><i
-                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    <a type="button" class="btn btn-default disabled"><i class="fa fa-arrow-circle-o-left"></i>Prev</a>
     
 
     <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
     
-    <a href="/2021/07/14/Linux手动安装JDK/" type="button" class="btn btn-default ">Next<i
+    <a href="/2021/07/14/脏牛提权/" type="button" class="btn btn-default ">Next<i
                 class="fa fa-arrow-circle-o-right"></i></a>
     
 
@@ -224,23 +239,12 @@ new Valine(valineConfig);
 	
 	<div class="meta-widget">
 	<i class="fa fa-clock-o"></i>
-	2021-07-14 
+	2021-07-20 
 	</div>
 	
 
 	<!-- categories -->
     
-	<div class="meta-widget">
-	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
-    <ul id="categorys" class="tag_box list-unstyled collapse in">
-          
-  <li>
-    <li><a href="/categories/权限提升/">权限提升<span>1</span></a></li>
-  </li>
-
-    </ul>
-	</div>
-	
 
 	<!-- tags -->
 	
@@ -248,7 +252,7 @@ new Valine(valineConfig);
 	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
     <ul id="tags" class="tag_box list-unstyled collapse in">	  
 	    
-  <li><a href="/tags/提权/">提权<span>1</span></a></li>
+  <li><a href="/tags/CMD/">CMD<span>1</span></a></li>
     </ul>
 	</div>
 		
