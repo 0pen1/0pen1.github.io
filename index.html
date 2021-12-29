@@ -128,6 +128,68 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2021/12/29/SpringBoot信息泄露/" >SpringBoot信息泄露</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-12-29  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="一、路由地址及接口调用详情泄漏"><a href="#一、路由地址及接口调用详情泄漏" class="headerlink" title="一、路由地址及接口调用详情泄漏"></a>一、路由地址及接口调用详情泄漏</h2><p>开发环境切换为线上生产环境时，相关人员没有更改配置文件或忘记切换配置环境，导致此漏洞</p>
+<p>直接访问以下几个路由，验证漏洞是否存在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/api-docs</span><br><span class="line">/v2/api-docs</span><br><span class="line">/swagger-ui.html</span><br></pre></td></tr></table></figure>
+
+<p>一些可能会遇到的接口路由变形：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/api.html</span><br><span class="line">/sw/swagger-ui.html</span><br><span class="line">/api/swagger-ui.html</span><br><span class="line">/template/swagger-ui.html</span><br><span class="line">/spring-security-rest/api/swagger-ui.html</span><br><span class="line">/spring-security-oauth-resource/swagger-ui.html</span><br></pre></td></tr></table></figure>
+
+<p>除此之外，下面的路由有时也会包含(或推测出)一些接口地址信息，但是无法获得参数相关信息：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">/mappings</span><br><span class="line">/actuator/mappings</span><br><span class="line">/metrics</span><br><span class="line">/actuator/metrics</span><br><span class="line">/beans</span><br><span class="line">/actuator/beans</span><br><span class="line">/configprops</span><br><span class="line">/actuator/configprops</span><br></pre></td></tr></table></figure>
+
+<p>一般来讲，直到 spring boot 应用的相关接口和传参信息并不能算是漏洞；</p>
+<p>但是可以检查暴露的接口是否存在未授权访问、越权或者其他业务型漏洞。</p>
+	
+
+	</div>
+  <a type="button" href="/2021/12/29/SpringBoot信息泄露/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="一、路由地址及接口调用详情泄漏"><a href="#一、路由地址及接口调用详情泄漏" class="headerlink" title="一、路由地址及接口调用详情泄漏"></a>一、路由地址及接口调用详情泄漏</h2><p>开发环境切换为线上生产环境时，相关人员没有更改配置文件或忘记切换配置环境，导致此漏洞</p>
+<p>直接访问以下几个路由，验证漏洞是否存在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/api-docs</span><br><span class="line">/v2/api-docs</span><br><span class="line">/swagger-ui.html</span><br></pre></td></tr></table></figure>
+
+<p>一些可能会遇到的接口路由变形：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/api.html</span><br><span class="line">/sw/swagger-ui.html</span><br><span class="line">/api/swagger-ui.html</span><br><span class="line">/template/swagger-ui.html</span><br><span class="line">/spring-security-rest/api/swagger-ui.html</span><br><span class="line">/spring-security-oauth-resource/swagger-ui.html</span><br></pre></td></tr></table></figure>
+
+<p>除此之外，下面的路由有时也会包含(或推测出)一些接口地址信息，但是无法获得参数相关信息：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">/mappings</span><br><span class="line">/actuator/mappings</span><br><span class="line">/metrics</span><br><span class="line">/actuator/metrics</span><br><span class="line">/beans</span><br><span class="line">/actuator/beans</span><br><span class="line">/configprops</span><br><span class="line">/actuator/configprops</span><br></pre></td></tr></table></figure>
+
+<p>一般来讲，直到 spring boot 应用的相关接口和传参信息并不能算是漏洞；</p>
+<p>但是可以检查暴露的接口是否存在未授权访问、越权或者其他业务型漏洞。</p>
+	
+	</div>
+  <a type="button" href="/2021/12/29/SpringBoot信息泄露/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2021/07/25/红日安全红队靶场（三）一次简单的内网渗透/" >红日安全红队靶场（三）一次简单的内网渗透</a>
 		</h3>
 		</div>
@@ -656,68 +718,6 @@
 </div>
 
 		
-			
-	
-	<!-- display as entry -->
-<div class="row">
-	<div class="col-md-8">
-		<h3 class="title">
-			<a href="/2021/04/20/横向移动/" >横向移动</a>
-		</h3>
-		</div>
-	<div class="col-md-4">
-		<div class="date">post @ 2021-04-20  </div>
-		</div>
-	</div>
-	
-
-
-			<!--
-<div class="entry">
-  <div class="row">
-	
-	
-		<h1 id="横向移动"><a href="#横向移动" class="headerlink" title="横向移动"></a>横向移动</h1><p>对 DC(10.10.10.2)目标主机建立共享连接，并查看目标主机共享资源。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shell net use \\10.10.10.2 /user:administrator <span class="string">&quot;JDredteam666&quot;</span></span><br><span class="line">shell net view \\10.10.10.2</span><br></pre></td></tr></table></figure>
-
-<p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109170638929.png" alt="image-20210109170638929"></p>
-<p>列出目标主机 C 盘下目录文件。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell dir \\10.10.10.2\C$</span><br></pre></td></tr></table></figure>
-
-<p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109170959454.png" alt="image-20210109170959454"></p>
-<p>将CS木马上传到跳板机。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload C:\Users\asus\Desktop\beacon.exe (C:\Users\Server\Desktop\beacon.exe)</span><br></pre></td></tr></table></figure>
-
-<p>将server(192.168.111.3)跳板机的木马文件copy到DC(10.10.10.2)目标机的C共享盘下。</p>
-	
-
-	</div>
-  <a type="button" href="/2021/04/20/横向移动/#more" class="btn btn-default more">Read More</a>
-</div>
-
--->
-<div class="entry">
-  <div class="row">
-	
-	
-		<h1 id="横向移动"><a href="#横向移动" class="headerlink" title="横向移动"></a>横向移动</h1><p>对 DC(10.10.10.2)目标主机建立共享连接，并查看目标主机共享资源。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shell net use \\10.10.10.2 /user:administrator <span class="string">&quot;JDredteam666&quot;</span></span><br><span class="line">shell net view \\10.10.10.2</span><br></pre></td></tr></table></figure>
-
-<p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109170638929.png" alt="image-20210109170638929"></p>
-<p>列出目标主机 C 盘下目录文件。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell dir \\10.10.10.2\C$</span><br></pre></td></tr></table></figure>
-
-<p><img src="%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8.assets/image-20210109170959454.png" alt="image-20210109170959454"></p>
-<p>将CS木马上传到跳板机。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload C:\Users\asus\Desktop\beacon.exe (C:\Users\Server\Desktop\beacon.exe)</span><br></pre></td></tr></table></figure>
-
-<p>将server(192.168.111.3)跳板机的木马文件copy到DC(10.10.10.2)目标机的C共享盘下。</p>
-	
-	</div>
-  <a type="button" href="/2021/04/20/横向移动/#more" class="btn btn-default more">Read More</a>
-</div>
-
-		
 
 		</div>
 
@@ -788,25 +788,27 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/iptables/">iptables<span>2</span></a></li>
-		
-			<li><a href="/tags/提权/">提权<span>1</span></a></li>
-		
-			<li><a href="/tags/docker/">docker<span>2</span></a></li>
-		
-			<li><a href="/tags/Cobalt-Strike插件开发/">Cobalt Strike插件开发<span>2</span></a></li>
-		
-			<li><a href="/tags/JDK/">JDK<span>1</span></a></li>
+			<li><a href="/tags/CMD/">CMD<span>1</span></a></li>
 		
 			<li><a href="/tags/内网渗透/">内网渗透<span>1</span></a></li>
 		
-			<li><a href="/tags/CMD/">CMD<span>1</span></a></li>
+			<li><a href="/tags/Cobalt-Strike插件开发/">Cobalt Strike插件开发<span>2</span></a></li>
 		
 			<li><a href="/tags/域/">域<span>1</span></a></li>
 		
-			<li><a href="/tags/反编译/">反编译<span>1</span></a></li>
+			<li><a href="/tags/SpringBoot/">SpringBoot<span>1</span></a></li>
+		
+			<li><a href="/tags/docker/">docker<span>2</span></a></li>
 		
 			<li><a href="/tags/横向移动/">横向移动<span>1</span></a></li>
+		
+			<li><a href="/tags/iptables/">iptables<span>2</span></a></li>
+		
+			<li><a href="/tags/反编译/">反编译<span>1</span></a></li>
+		
+			<li><a href="/tags/JDK/">JDK<span>1</span></a></li>
+		
+			<li><a href="/tags/提权/">提权<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -818,6 +820,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2021/12/29/SpringBoot信息泄露/" ><i class="fa fa-file-o"></i>SpringBoot信息泄露</a>
+      </li>
     
       <li>
         <a href="/2021/07/25/红日安全红队靶场（三）一次简单的内网渗透/" ><i class="fa fa-file-o"></i>红日安全红队靶场（三）一次简单的内网渗透</a>
@@ -833,10 +839,6 @@
     
       <li>
         <a href="/2021/07/14/脏牛提权/" ><i class="fa fa-file-o"></i>脏牛提权</a>
-      </li>
-    
-      <li>
-        <a href="/2021/07/14/Linux手动安装JDK/" ><i class="fa fa-file-o"></i>Linux手动安装JDK</a>
       </li>
     
   </ul>
