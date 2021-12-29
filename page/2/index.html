@@ -128,6 +128,68 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2021/05/11/Ubuntu执行service-iptables-save报错iptables：unrecognized-service-的解决方法/" >Ubuntu执行service iptables -save报错iptables：unrecognized service 的解决方法</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-05-11  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>问题描述：</p>
+<p><img src="Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95.assets/image-20210511171538464-1620724541793.png" alt="image-20210511171538464"></p>
+<p>解决办法：</p>
+<p>因为Ubuntu默认使用的防火墙并不是iptables，所以使用iptables之前需要先禁用UFW。</p>
+<p>命令如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw disable</span><br></pre></td></tr></table></figure>
+
+<p>类似地，在CentOS 7服务器的情况下，防火墙也可能是冲突的一个原因。FirewallD默认包含在CentOS 7中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service iptables save</span><br></pre></td></tr></table></figure>
+
+<p>有时，在Ubuntu服务器中执行以下命令会返回一个无法识别的服务消息。</p>
+<p>该命令基于/etc/init.d文件夹中iptables的启动脚本起作用。 通常，此命令适用于RHEL / Red Hat / CentOS。 在Ubuntu中，要保存防火墙规则的更改，我们使用以下命令</p>
+	
+
+	</div>
+  <a type="button" href="/2021/05/11/Ubuntu执行service-iptables-save报错iptables：unrecognized-service-的解决方法/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>问题描述：</p>
+<p><img src="Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95.assets/image-20210511171538464-1620724541793.png" alt="image-20210511171538464"></p>
+<p>解决办法：</p>
+<p>因为Ubuntu默认使用的防火墙并不是iptables，所以使用iptables之前需要先禁用UFW。</p>
+<p>命令如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw disable</span><br></pre></td></tr></table></figure>
+
+<p>类似地，在CentOS 7服务器的情况下，防火墙也可能是冲突的一个原因。FirewallD默认包含在CentOS 7中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service iptables save</span><br></pre></td></tr></table></figure>
+
+<p>有时，在Ubuntu服务器中执行以下命令会返回一个无法识别的服务消息。</p>
+<p>该命令基于/etc/init.d文件夹中iptables的启动脚本起作用。 通常，此命令适用于RHEL / Red Hat / CentOS。 在Ubuntu中，要保存防火墙规则的更改，我们使用以下命令</p>
+	
+	</div>
+  <a type="button" href="/2021/05/11/Ubuntu执行service-iptables-save报错iptables：unrecognized-service-的解决方法/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2021/04/20/横向移动/" >横向移动</a>
 		</h3>
 		</div>
@@ -420,27 +482,29 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
+			<li><a href="/tags/提权/">提权<span>1</span></a></li>
+		
+			<li><a href="/tags/SpringBoot/">SpringBoot<span>1</span></a></li>
+		
 			<li><a href="/tags/CMD/">CMD<span>1</span></a></li>
 		
 			<li><a href="/tags/域/">域<span>1</span></a></li>
 		
-			<li><a href="/tags/iptables/">iptables<span>2</span></a></li>
-		
-			<li><a href="/tags/内网渗透/">内网渗透<span>1</span></a></li>
+			<li><a href="/tags/反编译/">反编译<span>1</span></a></li>
 		
 			<li><a href="/tags/docker/">docker<span>2</span></a></li>
 		
-			<li><a href="/tags/SpringBoot/">SpringBoot<span>1</span></a></li>
+			<li><a href="/tags/免杀/">免杀<span>1</span></a></li>
 		
-			<li><a href="/tags/JDK/">JDK<span>1</span></a></li>
+			<li><a href="/tags/iptables/">iptables<span>2</span></a></li>
 		
 			<li><a href="/tags/Cobalt-Strike插件开发/">Cobalt Strike插件开发<span>2</span></a></li>
 		
+			<li><a href="/tags/内网渗透/">内网渗透<span>1</span></a></li>
+		
 			<li><a href="/tags/横向移动/">横向移动<span>1</span></a></li>
 		
-			<li><a href="/tags/反编译/">反编译<span>1</span></a></li>
-		
-			<li><a href="/tags/提权/">提权<span>1</span></a></li>
+			<li><a href="/tags/JDK/">JDK<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -452,6 +516,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2021/12/29/DLL解钩技术/" ><i class="fa fa-file-o"></i>DLL解钩技术</a>
+      </li>
     
       <li>
         <a href="/2021/12/29/SpringBoot信息泄露/" ><i class="fa fa-file-o"></i>SpringBoot信息泄露</a>
@@ -467,10 +535,6 @@
     
       <li>
         <a href="/2021/07/20/文件隐藏的小技巧/" ><i class="fa fa-file-o"></i>文件隐藏的小技巧</a>
-      </li>
-    
-      <li>
-        <a href="/2021/07/14/脏牛提权/" ><i class="fa fa-file-o"></i>脏牛提权</a>
       </li>
     
   </ul>

