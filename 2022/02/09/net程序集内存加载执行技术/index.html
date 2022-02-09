@@ -1,0 +1,358 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>.net程序集内存加载执行技术 | 0pen1的博客</title>
+  <meta name="author" content="0pen1">
+  
+  <meta name="description" content="前言Cobalt Strike 从3.11开始增加了一个叫“execute-assembly”的命令，这个命令能够从内存中直接加载.net程序集执行。由于没有文件落地，十分隐蔽，在实战当中应用非常广泛。本文会对Cobalt Strike的execute-assembly命令的执行过程进行分析，并且结合现有的开源项目对此技术的原理进行简单介绍。
+基础知识1.CLR全称Common Language Runtime（公共语言运行时），是一个可由多种编程语言使用的运行环境
+CLR是.NET Framework的主要执行引擎，作用之一是监视程序的运行：
+
+在CLR监视之下运行的程序属于”托管的”(managed)代码
+不在CLR之下、直接在裸机上运行的应用或者组件属于”非托管的”(unmanaged)的代码
+
+2.Unmanaged API参考资料：
+https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content=".net程序集内存加载执行技术"/>
+  <meta property="og:site_name" content="0pen1的博客"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70812759-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70812759-1');
+</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">0pen1的博客</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class=""></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class=""></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class=""></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> .net程序集内存加载执行技术</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Cobalt Strike 从3.11开始增加了一个叫“execute-assembly”的命令，这个命令能够从内存中直接加载.net程序集执行。由于没有文件落地，十分隐蔽，在实战当中应用非常广泛。本文会对Cobalt Strike的execute-assembly命令的执行过程进行分析，并且结合现有的开源项目对此技术的原理进行简单介绍。</p>
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><h3 id="1-CLR"><a href="#1-CLR" class="headerlink" title="1.CLR"></a>1.CLR</h3><p>全称Common Language Runtime（公共语言运行时），是一个可由多种编程语言使用的运行环境</p>
+<p>CLR是.NET Framework的主要执行引擎，作用之一是监视程序的运行：</p>
+<ul>
+<li>在CLR监视之下运行的程序属于”托管的”(managed)代码</li>
+<li>不在CLR之下、直接在裸机上运行的应用或者组件属于”非托管的”(unmanaged)的代码</li>
+</ul>
+<h3 id="2-Unmanaged-API"><a href="#2-Unmanaged-API" class="headerlink" title="2.Unmanaged API"></a>2.Unmanaged API</h3><p>参考资料：</p>
+<p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/">https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/</a></p>
+<p>用于将.NET 程序集加载到任意程序中的API</p>
+<p>支持两种接口：</p>
+<ul>
+<li>ICorRuntimeHost Interface</li>
+<li>ICLRRuntimeHost Interface</li>
+</ul>
+<h3 id="3-ICorRuntimeHost-Interface"><a href="#3-ICorRuntimeHost-Interface" class="headerlink" title="3.ICorRuntimeHost Interface"></a>3.ICorRuntimeHost Interface</h3><p>参考资料：</p>
+<p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/hosting/icorruntimehost-interface">https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/hosting/icorruntimehost-interface</a></p>
+<p>支持v1.0.3705, v1.1.4322, v2.0.50727和v4.0.30319</p>
+<h3 id="4-ICLRRuntimeHost-Interface"><a href="#4-ICLRRuntimeHost-Interface" class="headerlink" title="4.ICLRRuntimeHost Interface"></a>4.ICLRRuntimeHost Interface</h3><p>参考资料：</p>
+<p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/hosting/iclrruntimehost-interface">https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/hosting/iclrruntimehost-interface</a></p>
+<p>支持v2.0.50727和v4.0.30319</p>
+<p>在.NET Framework 2.0中，ICLRRuntimeHost用于取代ICorRuntimeHost</p>
+<p>在实际程序开发中，很少会考虑.NET Framework 1.0，所以两个接口都可以使用</p>
+<h2 id="CS内存执行流程分析"><a href="#CS内存执行流程分析" class="headerlink" title="CS内存执行流程分析"></a>CS内存执行流程分析</h2><p>在Cobalt Strike的代码中找到BeaconConsole.java文件，定位到“execute-assembly”命令处。通过简单分析这段代码可以知道，当解析到用户执行“execute-assembly”命令后，会先验证”pZ“和”F“关键字来判断要执行的.net程序集是否带有参数（具体如何判断请查看CommandParser类）。判断完成使用CommandParser类的popstring方法将execute-assembly的参数赋值给变量，然后调用ExecuteAssembly方法执行程序集。</p>
+<p><img src="net%E7%A8%8B%E5%BA%8F%E9%9B%86%E5%86%85%E5%AD%98%E5%8A%A0%E8%BD%BD%E6%89%A7%E8%A1%8C%E6%8A%80%E6%9C%AF.assets/image-20220114182430780-16443915545351.png" alt="image-20220114182430780"></p>
+<p>我们继续跟进ExecuteAssembly方法，ExecuteAssembly方法有两个参数，第一个参数为待执行的.net程序集路径，第二个参数为.net程序集执行需要的参数。执行这个方法时先将要执行的.net程序集从硬盘读取并加载到PE解析器（PEParser）中，随后判断加载的PE文件是否为.net程序集，如果是.net程序集则创建ExecuteAssemblyJob实例并调用spawn方法。</p>
+<p><img src="net%E7%A8%8B%E5%BA%8F%E9%9B%86%E5%86%85%E5%AD%98%E5%8A%A0%E8%BD%BD%E6%89%A7%E8%A1%8C%E6%8A%80%E6%9C%AF.assets/image-20220114182256752.png" alt="image-20220114182256752"></p>
+<p>接下来进入spawn方法，可以看到是通过反射DLL的方法，将invokeassembly.dll注入到进程当中，并且设置任务号为70（x86版本）或者71（x64）。注入的invokeassembly.dll在其内存中创建CLR环境，然后通过管道再将C#可执行文件读取到内存中,最后执行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">spawn</span><span class="params">(String var1)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">byte</span>[] var2 = <span class="keyword">this</span>.getDLLContent();</span><br><span class="line">      <span class="keyword">int</span> var3 = ReflectiveDLL.findReflectiveLoader(var2);</span><br><span class="line">      <span class="keyword">if</span> (var3 &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">         <span class="keyword">this</span>.tasker.error(<span class="string">&quot;Could not find reflective loader in &quot;</span> + <span class="keyword">this</span>.getDLLName());</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">         <span class="keyword">if</span> (ReflectiveDLL.is64(var2)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">this</span>.ignoreToken()) &#123;</span><br><span class="line">               <span class="keyword">this</span>.builder.setCommand(<span class="number">71</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="keyword">this</span>.builder.setCommand(<span class="number">88</span>);</span><br><span class="line">            &#125;</span><br><span class="line">         &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>.ignoreToken()) &#123;</span><br><span class="line">            <span class="keyword">this</span>.builder.setCommand(<span class="number">70</span>);</span><br><span class="line">         &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">this</span>.builder.setCommand(<span class="number">87</span>);</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         var2 = <span class="keyword">this</span>.fix(var2);</span><br><span class="line">         <span class="keyword">if</span> (<span class="keyword">this</span>.tasker.obfuscatePostEx()) &#123;</span><br><span class="line">            var2 = <span class="keyword">this</span>._obfuscate(var2);</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         var2 = <span class="keyword">this</span>.setupSmartInject(var2);</span><br><span class="line">         <span class="keyword">byte</span>[] var4 = <span class="keyword">this</span>.getArgument();</span><br><span class="line">         <span class="keyword">this</span>.builder.addShort(<span class="keyword">this</span>.getCallbackType());</span><br><span class="line">         <span class="keyword">this</span>.builder.addShort(<span class="keyword">this</span>.getWaitTime());</span><br><span class="line">         <span class="keyword">this</span>.builder.addInteger(var3);</span><br><span class="line">         <span class="keyword">this</span>.builder.addLengthAndString(<span class="keyword">this</span>.getShortDescription());</span><br><span class="line">         <span class="keyword">this</span>.builder.addInteger(var4.length);</span><br><span class="line">         <span class="keyword">this</span>.builder.addString(var4);</span><br><span class="line">         <span class="keyword">this</span>.builder.addString(var2);</span><br><span class="line">         <span class="keyword">byte</span>[] var5 = <span class="keyword">this</span>.builder.build();</span><br><span class="line">         <span class="keyword">this</span>.tasker.task(var1, var5, <span class="keyword">this</span>.getDescription(), <span class="keyword">this</span>.getTactic());</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="net%E7%A8%8B%E5%BA%8F%E9%9B%86%E5%86%85%E5%AD%98%E5%8A%A0%E8%BD%BD%E6%89%A7%E8%A1%8C%E6%8A%80%E6%9C%AF.assets/image-20220209135538841.png" alt="image-20220209135538841"></p>
+<p><img src="net%E7%A8%8B%E5%BA%8F%E9%9B%86%E5%86%85%E5%AD%98%E5%8A%A0%E8%BD%BD%E6%89%A7%E8%A1%8C%E6%8A%80%E6%9C%AF.assets/image-20220117192352767.png" alt="image-20220117192352767"></p>
+<p>总结一下，Cobalt Strike内存加载执行.net程序集大概的过程就是，首先spawn一个进程并传输invokeassembly.dll注入到该进程，invokeassembly.dll实现了在其内存中创建CLR环境，然后通过管道再将C#可执行文件读取到内存中,最后执行。</p>
+<h2 id="net程序集内存加载执行"><a href="#net程序集内存加载执行" class="headerlink" title=".net程序集内存加载执行"></a>.net程序集内存加载执行</h2><h3 id="内存加载执行流程"><a href="#内存加载执行流程" class="headerlink" title="内存加载执行流程"></a>内存加载执行流程</h3><ol>
+<li>初始化ICLRMetaHost接口。</li>
+<li>通过ICLRMetaHost获取ICLRRuntimeInfo接口。</li>
+<li>通过ICLRRuntimeInfo将 CLR 加载到当前进程并返回运行时接口ICLRRuntimeHost指针。</li>
+<li>通过ICLRRuntimeHost.Start()初始化CLR。</li>
+<li>通过ICLRRuntimeHost获取AppDomain接口指针。</li>
+<li>通过AppDomain接口的QueryInterface方法来查询默认应用程序域的实例指针。</li>
+<li>通过默认应用程序域实例的Load_3方法加载安全.net程序集数组，并返回Assembly的实例对象指针。</li>
+<li>通过Assembly实例对象的get_EntryPoint方法获取描述入口点的MethodInfo实例对象。</li>
+<li>创建参数安全数组</li>
+<li>通过描述入口点的MethodInfo实例对象的Invoke方法执行入口点。</li>
+</ol>
+<h3 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;tchar.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;metahost.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> comment(lib, <span class="meta-string">&quot;mscoree.lib&quot;</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;mscorlib.tlb&gt;</span> raw_interfaces_only			\</span></span><br><span class="line">    	<span class="built_in">high_property_prefixes</span>(<span class="string">&quot;_get&quot;</span>,<span class="string">&quot;_put&quot;</span>,<span class="string">&quot;_putref&quot;</span>)		\</span><br><span class="line">    	<span class="built_in">rename</span>(<span class="string">&quot;ReportEvent&quot;</span>, <span class="string">&quot;InteropServices_ReportEvent&quot;</span>)	\</span><br><span class="line">	<span class="built_in">rename</span>(<span class="string">&quot;or&quot;</span>, <span class="string">&quot;InteropServices_or&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> mscorlib;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ASSEMBLY_LENGTH  8192</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span> dotnetRaw[ASSEMBLY_LENGTH] =</span><br><span class="line"><span class="string">&quot;\x4d\x5a\x90\x00\x03\x00\x00\x00\x04\x00\x00\x00\xff\xff\x00...&quot;</span>;<span class="comment">//.net程序集字节数组</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> _tmain(<span class="keyword">int</span> argc, _TCHAR* argv[])</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">	ICLRMetaHost* iMetaHost = <span class="literal">NULL</span>;</span><br><span class="line">	ICLRRuntimeInfo* iRuntimeInfo = <span class="literal">NULL</span>;</span><br><span class="line">	ICorRuntimeHost* iRuntimeHost = <span class="literal">NULL</span>;</span><br><span class="line">	IUnknownPtr pAppDomain = <span class="literal">NULL</span>;</span><br><span class="line">	_AppDomainPtr pDefaultAppDomain = <span class="literal">NULL</span>;</span><br><span class="line">	_AssemblyPtr pAssembly = <span class="literal">NULL</span>;</span><br><span class="line">	_MethodInfoPtr pMethodInfo = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="comment">// 定义SAFEARRAYBOUND结构体，设置维度为1</span></span><br><span class="line">	SAFEARRAYBOUND saBound[<span class="number">1</span>];</span><br><span class="line">	<span class="keyword">void</span>* pData = <span class="literal">NULL</span>;</span><br><span class="line">	VARIANT vRet;</span><br><span class="line">	VARIANT vObj;</span><br><span class="line">	VARIANT vPsa;</span><br><span class="line">	SAFEARRAY* args = <span class="literal">NULL</span>;</span><br><span class="line">	<span class="comment">// 初始化ICLRMetaHost接口。</span></span><br><span class="line">	<span class="built_in">CLRCreateInstance</span>(CLSID_CLRMetaHost, IID_ICLRMetaHost, (VOID**)&amp;iMetaHost);</span><br><span class="line">    <span class="comment">// 通过ICLRMetaHost获取ICLRRuntimeInfo接口。</span></span><br><span class="line">	iMetaHost-&gt;<span class="built_in">GetRuntime</span>(<span class="string">L&quot;v4.0.30319&quot;</span>, IID_ICLRRuntimeInfo, (VOID**)&amp;iRuntimeInfo);</span><br><span class="line">    <span class="comment">// 通过ICLRRuntimeInfo将 CLR 加载到当前进程并返回运行时接口ICorRuntimeHost指针</span></span><br><span class="line">	iRuntimeInfo-&gt;<span class="built_in">GetInterface</span>(CLSID_CorRuntimeHost, IID_ICorRuntimeHost, (VOID**)&amp;iRuntimeHost);</span><br><span class="line">    <span class="comment">// 通过ICLRRuntimeHost.Start()初始化CLR。</span></span><br><span class="line">	iRuntimeHost-&gt;<span class="built_in">Start</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 通过ICLRRuntimeHost获取AppDomain接口指针。</span></span><br><span class="line">	iRuntimeHost-&gt;<span class="built_in">GetDefaultDomain</span>(&amp;pAppDomain);</span><br><span class="line">    <span class="comment">// 然后通过AppDomain接口的QueryInterface方法来查询默认应用程序域的实例指针。</span></span><br><span class="line">	pAppDomain-&gt;<span class="built_in">QueryInterface</span>(__uuidof(_AppDomain), (VOID**)&amp;pDefaultAppDomain);</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// 数组的长度</span></span><br><span class="line">	saBound[<span class="number">0</span>].cElements = ASSEMBLY_LENGTH;</span><br><span class="line">    <span class="comment">// 设置第一维的起始下标</span></span><br><span class="line">	saBound[<span class="number">0</span>].lLbound = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// 创建一个新的数组描述符，分配和初始化数组的数据，并返回一个指向新数组描述符的指针。</span></span><br><span class="line">	SAFEARRAY* pSafeArray = <span class="built_in">SafeArrayCreate</span>(VT_UI1, <span class="number">1</span>, saBound);</span><br><span class="line">    <span class="comment">// 增加数组的锁计数，并返回数组的指针。</span></span><br><span class="line">	<span class="built_in">SafeArrayAccessData</span>(pSafeArray, &amp;pData);</span><br><span class="line">    <span class="comment">// 在缓冲区之间复制字节。</span></span><br><span class="line">	<span class="built_in">memcpy</span>(pData, dotnetRaw, ASSEMBLY_LENGTH);</span><br><span class="line">    <span class="comment">// 减少数组的锁计数，并释放通过SafeArrayAccessData返回的指针。</span></span><br><span class="line">	<span class="built_in">SafeArrayUnaccessData</span>(pSafeArray);</span><br><span class="line">	<span class="comment">// 通过默认应用程序域实例的Load_3方法加载安全.net程序集数组，并返回Assembly的实例对象指针。</span></span><br><span class="line">	pDefaultAppDomain-&gt;<span class="built_in">Load_3</span>(pSafeArray, &amp;pAssembly);</span><br><span class="line">    <span class="comment">// 通过Assembly实例对象的get_EntryPoint方法获取描述入口点的MethodInfo实例对象。</span></span><br><span class="line">	pAssembly-&gt;<span class="built_in">get_EntryPoint</span>(&amp;pMethodInfo);</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// 创建参数安全数组</span></span><br><span class="line">    vPsa.vt = (VT_ARRAY | VT_BSTR);</span><br><span class="line">	args = <span class="built_in">SafeArrayCreateVector</span>(VT_VARIANT, <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line">	<span class="keyword">if</span> (argc &gt; <span class="number">1</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		vPsa.parray = <span class="built_in">SafeArrayCreateVector</span>(VT_BSTR, <span class="number">0</span>, argc);</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">long</span> i = <span class="number">0</span>; i &lt; argc; i++)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">SafeArrayPutElement</span>(vPsa.parray, &amp;i, <span class="built_in">SysAllocString</span>(argv[i]));</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">long</span> idx[<span class="number">1</span>] = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">		<span class="built_in">SafeArrayPutElement</span>(args, idx, &amp;vPsa);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">    <span class="built_in">ZeroMemory</span>(&amp;vRet, <span class="built_in"><span class="keyword">sizeof</span></span>(VARIANT));</span><br><span class="line">	<span class="built_in">ZeroMemory</span>(&amp;vObj, <span class="built_in"><span class="keyword">sizeof</span></span>(VARIANT));</span><br><span class="line">	vObj.vt = VT_NULL;</span><br><span class="line">    <span class="comment">// 通过描述入口点的MethodInfo实例对象的Invoke方法执行入口点。</span></span><br><span class="line">	HRESULT hr = pMethodInfo-&gt;<span class="built_in">Invoke_3</span>(vObj, args, &amp;vRet);</span><br><span class="line">	pMethodInfo-&gt;<span class="built_in">Release</span>();</span><br><span class="line">	pAssembly-&gt;<span class="built_in">Release</span>();</span><br><span class="line">	pDefaultAppDomain-&gt;<span class="built_in">Release</span>();</span><br><span class="line">	iRuntimeInfo-&gt;<span class="built_in">Release</span>();</span><br><span class="line">	iMetaHost-&gt;<span class="built_in">Release</span>();</span><br><span class="line">	<span class="built_in">CoUninitialize</span>();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="其他开源实现"><a href="#其他开源实现" class="headerlink" title="其他开源实现"></a>其他开源实现</h3><p><a target="_blank" rel="noopener" href="https://github.com/caseysmithrc/AssemblyLoader">https://github.com/caseysmithrc/AssemblyLoader</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/etormadiv/HostingCLR">https://github.com/etormadiv/HostingCLR</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/b4rtik/metasploit-execute-assembly">https://github.com/b4rtik/metasploit-execute-assembly</a></p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p><a target="_blank" rel="noopener" href="https://3gstudent.github.io/%E4%BB%8E%E5%86%85%E5%AD%98%E5%8A%A0%E8%BD%BD.NET%E7%A8%8B%E5%BA%8F%E9%9B%86(execute-assembly)%E7%9A%84%E5%88%A9%E7%94%A8%E5%88%86%E6%9E%90">https://3gstudent.github.io/%E4%BB%8E%E5%86%85%E5%AD%98%E5%8A%A0%E8%BD%BD.NET%E7%A8%8B%E5%BA%8F%E9%9B%86(execute-assembly)%E7%9A%84%E5%88%A9%E7%94%A8%E5%88%86%E6%9E%90</a></p>
+<p><a target="_blank" rel="noopener" href="https://b4rtik.github.io/posts/execute-assembly-via-meterpreter-session-part-2/">https://b4rtik.github.io/posts/execute-assembly-via-meterpreter-session-part-2/</a></p>
+<p><a target="_blank" rel="noopener" href="https://idiotc4t.com/defense-evasion/cobaltstrike-executeassembly-realization#liu-chengbnei-cun-jia-zai">https://idiotc4t.com/defense-evasion/cobaltstrike-executeassembly-realization#liu-chengbnei-cun-jia-zai</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/b4rtik/metasploit-execute-assembly">https://github.com/b4rtik/metasploit-execute-assembly</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/jisuanjixu/article/details/5959186">https://blog.csdn.net/jisuanjixu/article/details/5959186</a></p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/2022/02/09/net%E7%A8%8B%E5%BA%8F%E9%9B%86%E5%86%85%E5%AD%98%E5%8A%A0%E8%BD%BD%E6%89%A7%E8%A1%8C%E6%8A%80%E6%9C%AF/" class="leancloud-visitors view" data-flag-title=".net程序集内存加载执行技术">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a type="button" class="btn btn-default disabled"><i class="fa fa-arrow-circle-o-left"></i>Prev</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2021/12/29/DLL解钩技术/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xxx","appKey":"xxx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2022-02-09 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/execute-assembly/">execute-assembly<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2022 0pen1's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>

@@ -128,6 +128,62 @@
 <div class="row">
 	<div class="col-md-8">
 		<h3 class="title">
+			<a href="/2022/02/09/net程序集内存加载执行技术/" >.net程序集内存加载执行技术</a>
+		</h3>
+		</div>
+	<div class="col-md-4">
+		<div class="date">post @ 2022-02-09  </div>
+		</div>
+	</div>
+	
+
+
+			<!--
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Cobalt Strike 从3.11开始增加了一个叫“execute-assembly”的命令，这个命令能够从内存中直接加载.net程序集执行。由于没有文件落地，十分隐蔽，在实战当中应用非常广泛。本文会对Cobalt Strike的execute-assembly命令的执行过程进行分析，并且结合现有的开源项目对此技术的原理进行简单介绍。</p>
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><h3 id="1-CLR"><a href="#1-CLR" class="headerlink" title="1.CLR"></a>1.CLR</h3><p>全称Common Language Runtime（公共语言运行时），是一个可由多种编程语言使用的运行环境</p>
+<p>CLR是.NET Framework的主要执行引擎，作用之一是监视程序的运行：</p>
+<ul>
+<li>在CLR监视之下运行的程序属于”托管的”(managed)代码</li>
+<li>不在CLR之下、直接在裸机上运行的应用或者组件属于”非托管的”(unmanaged)的代码</li>
+</ul>
+<h3 id="2-Unmanaged-API"><a href="#2-Unmanaged-API" class="headerlink" title="2.Unmanaged API"></a>2.Unmanaged API</h3><p>参考资料：</p>
+<p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/">https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/</a></p>
+	
+
+	</div>
+  <a type="button" href="/2022/02/09/net程序集内存加载执行技术/#more" class="btn btn-default more">Read More</a>
+</div>
+
+-->
+<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Cobalt Strike 从3.11开始增加了一个叫“execute-assembly”的命令，这个命令能够从内存中直接加载.net程序集执行。由于没有文件落地，十分隐蔽，在实战当中应用非常广泛。本文会对Cobalt Strike的execute-assembly命令的执行过程进行分析，并且结合现有的开源项目对此技术的原理进行简单介绍。</p>
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><h3 id="1-CLR"><a href="#1-CLR" class="headerlink" title="1.CLR"></a>1.CLR</h3><p>全称Common Language Runtime（公共语言运行时），是一个可由多种编程语言使用的运行环境</p>
+<p>CLR是.NET Framework的主要执行引擎，作用之一是监视程序的运行：</p>
+<ul>
+<li>在CLR监视之下运行的程序属于”托管的”(managed)代码</li>
+<li>不在CLR之下、直接在裸机上运行的应用或者组件属于”非托管的”(unmanaged)的代码</li>
+</ul>
+<h3 id="2-Unmanaged-API"><a href="#2-Unmanaged-API" class="headerlink" title="2.Unmanaged API"></a>2.Unmanaged API</h3><p>参考资料：</p>
+<p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/">https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/</a></p>
+	
+	</div>
+  <a type="button" href="/2022/02/09/net程序集内存加载执行技术/#more" class="btn btn-default more">Read More</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->
+<div class="row">
+	<div class="col-md-8">
+		<h3 class="title">
 			<a href="/2021/12/29/DLL解钩技术/" >DLL解钩技术</a>
 		</h3>
 		</div>
@@ -662,70 +718,6 @@
 </div>
 
 		
-			
-	
-	<!-- display as entry -->
-<div class="row">
-	<div class="col-md-8">
-		<h3 class="title">
-			<a href="/2021/06/21/Jar包反编译和重打包/" >Jar包反编译和重打包</a>
-		</h3>
-		</div>
-	<div class="col-md-4">
-		<div class="date">post @ 2021-06-21  </div>
-		</div>
-	</div>
-	
-
-
-			<!--
-<div class="entry">
-  <div class="row">
-	
-	
-		<h1 id="Jar反编译和重打包"><a href="#Jar反编译和重打包" class="headerlink" title="Jar反编译和重打包"></a>Jar反编译和重打包</h1><p><strong>使用jadx反编译</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;jadx -d win win.jar</span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>使用javac编译工程</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javac -encoding utf8 -cp classes -d classes .&#x2F;src&#x2F;com&#x2F;jlcss&#x2F;ep&#x2F;*.java -classpath .&#x2F;lib&#x2F;swt.jar</span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>重新打包</strong></p>
-<p>将jar解压，替换classes后重新打包成zip文件，最后将后缀改成jar即可</p>
-
-	
-
-	</div>
-  <a type="button" href="/2021/06/21/Jar包反编译和重打包/#more" class="btn btn-default more">Read More</a>
-</div>
-
--->
-<div class="entry">
-  <div class="row">
-	
-	
-		<h1 id="Jar反编译和重打包"><a href="#Jar反编译和重打包" class="headerlink" title="Jar反编译和重打包"></a>Jar反编译和重打包</h1><p><strong>使用jadx反编译</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;jadx -d win win.jar</span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>使用javac编译工程</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javac -encoding utf8 -cp classes -d classes .&#x2F;src&#x2F;com&#x2F;jlcss&#x2F;ep&#x2F;*.java -classpath .&#x2F;lib&#x2F;swt.jar</span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>重新打包</strong></p>
-<p>将jar解压，替换classes后重新打包成zip文件，最后将后缀改成jar即可</p>
-
-	
-	</div>
-  <a type="button" href="/2021/06/21/Jar包反编译和重打包/#more" class="btn btn-default more">Read More</a>
-</div>
-
-		
 
 		</div>
 
@@ -796,29 +788,31 @@
 		<h4>Tag Cloud</h4>
 		<ul class="tag_box inline list-unstyled">		
 		
-			<li><a href="/tags/Cobalt-Strike插件开发/">Cobalt Strike插件开发<span>2</span></a></li>
-		
-			<li><a href="/tags/提权/">提权<span>1</span></a></li>
-		
-			<li><a href="/tags/JDK/">JDK<span>1</span></a></li>
-		
 			<li><a href="/tags/内网渗透/">内网渗透<span>1</span></a></li>
-		
-			<li><a href="/tags/CMD/">CMD<span>1</span></a></li>
 		
 			<li><a href="/tags/docker/">docker<span>2</span></a></li>
 		
 			<li><a href="/tags/横向移动/">横向移动<span>1</span></a></li>
 		
-			<li><a href="/tags/域/">域<span>1</span></a></li>
+			<li><a href="/tags/反编译/">反编译<span>1</span></a></li>
 		
-			<li><a href="/tags/iptables/">iptables<span>2</span></a></li>
+			<li><a href="/tags/Cobalt-Strike插件开发/">Cobalt Strike插件开发<span>2</span></a></li>
+		
+			<li><a href="/tags/execute-assembly/">execute-assembly<span>1</span></a></li>
+		
+			<li><a href="/tags/免杀/">免杀<span>1</span></a></li>
+		
+			<li><a href="/tags/CMD/">CMD<span>1</span></a></li>
+		
+			<li><a href="/tags/JDK/">JDK<span>1</span></a></li>
 		
 			<li><a href="/tags/SpringBoot/">SpringBoot<span>1</span></a></li>
 		
-			<li><a href="/tags/反编译/">反编译<span>1</span></a></li>
+			<li><a href="/tags/iptables/">iptables<span>2</span></a></li>
 		
-			<li><a href="/tags/免杀/">免杀<span>1</span></a></li>
+			<li><a href="/tags/提权/">提权<span>1</span></a></li>
+		
+			<li><a href="/tags/域/">域<span>1</span></a></li>
 		
 		 
 		</ul>
@@ -830,6 +824,10 @@
 <div class="widget">
   <h4>Recent Posts</h4>
   <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2022/02/09/net程序集内存加载执行技术/" ><i class="fa fa-file-o"></i>.net程序集内存加载执行技术</a>
+      </li>
     
       <li>
         <a href="/2021/12/29/DLL解钩技术/" ><i class="fa fa-file-o"></i>DLL解钩技术</a>
@@ -845,10 +843,6 @@
     
       <li>
         <a href="/2021/07/23/Docker常用命令速查/" ><i class="fa fa-file-o"></i>Docker常用命令速查</a>
-      </li>
-    
-      <li>
-        <a href="/2021/07/20/文件隐藏的小技巧/" ><i class="fa fa-file-o"></i>文件隐藏的小技巧</a>
       </li>
     
   </ul>
@@ -878,7 +872,7 @@
   <div class="container-narrow">
   <footer> <p>
   
-  &copy; 2021 0pen1's Blog
+  &copy; 2022 0pen1's Blog
   
       powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
 </p>
